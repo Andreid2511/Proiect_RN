@@ -2,8 +2,8 @@
 
 **Disciplina:** Rețele Neuronale  
 **Instituție:** POLITEHNICA București – FIIR  
-**Student:** [Nume Prenume]  
-**Data:** [Data]  
+**Student:** Boata Andrei-Darius 
+**Data:** 21.11.2025 
 
 ---
 
@@ -40,25 +40,27 @@ project-name/
 
 ### 2.1 Sursa datelor
 
-* **Origine:** [Descriere sursă date - ex: senzori robot, dataset public, simulare]
-* **Modul de achiziție:** ☐ Senzori reali / ☐ Simulare / ☐ Fișier extern / ☐ Generare programatică
-* **Perioada / condițiile colectării:** [Ex: Noiembrie 2024 - Ianuarie 2025, condiții experimentale specifice]
+* **Origine:** Date generate programatic pe baza unui mix de traseu (urban + extraurban + autostradă), care modelează comportamentul vehiculului în accelerare, decelerare și viteze constante.
+* **Modul de achiziție:** ☑ Generare programatică (simulare)
+* **Perioada / condițiile colectării:** Setul de date a fost generat în cadrul proiectului, folosind parametrii de condus definiți de mine (accelerații, frânări, timpi, distanțe, viteze pe segmente).
 
 ### 2.2 Caracteristicile dataset-ului
 
-* **Număr total de observații:** [Ex: 15,000]
-* **Număr de caracteristici (features):** [Ex: 12]
-* **Tipuri de date:** ☐ Numerice / ☐ Categoriale / ☐ Temporale / ☐ Imagini
-* **Format fișiere:** ☐ CSV / ☐ TXT / ☐ JSON / ☐ PNG / ☐ Altele: [...]
+* **Număr total de observații:** 1000
+* **Număr de caracteristici (features):** 6
+* **Tipuri de date:** ☑ Numerice / ☑ Temporale
+* **Format fișiere:** ☑ CSV
 
 ### 2.3 Descrierea fiecărei caracteristici
 
 | **Caracteristică** | **Tip** | **Unitate** | **Descriere** | **Domeniu valori** |
 |-------------------|---------|-------------|---------------|--------------------|
-| feature_1 | numeric | mm | [...] | 0–150 |
-| feature_2 | categorial | – | [...] | {A, B, C} |
-| feature_3 | numeric | m/s | [...] | 0–2.5 |
-| ... | ... | ... | ... | ... |
+| crankshaft_position_sensor | numeric | rpm | [Masurarea turatiilor] | 0–6000 |
+| speed | categorial | numeric | km/h | [senzor ABS sau senzor de viteza VVS sau WWS]  | 0-250 |
+| throttle_position | percentage | % | [TPS pozitia pedalei de acceleratie] | 0–100 |
+| braking | percentage | % | [BPPS pozitia pedalei de frana] | 0–100 |
+| tilt_sensor | degrees | ° | [Senzor cu plaja completa de masurare pentru toate automobilele] | ±90° |
+| time | numeric | s | [Timpul de la pornire] | 0–100 |
 
 **Fișier recomandat:**  `data/README.md`
 
@@ -68,8 +70,12 @@ project-name/
 
 ### 3.1 Statistici descriptive aplicate
 
-* **Medie, mediană, deviație standard**
-* **Min–max și quartile**
+Asupra celor 6 caracteristici (crankshaft position, speed, throttle, braking, tilt, time) au fost calculate:
+
+* **Media** – pentru a observa nivelul mediu al fiecărui senzor
+* **Mediana** – pentru a reduce influența valorilor extreme
+* **Deviația standard** – pentru a măsura variabilitatea fiecărei măsurători
+* **Min–Max** – pentru a identifica domeniul real folosit
 * **Distribuții pe caracteristici** (histograme)
 * **Identificarea outlierilor** (IQR / percentile)
 
