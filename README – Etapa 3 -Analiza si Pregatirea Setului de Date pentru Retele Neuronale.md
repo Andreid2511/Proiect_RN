@@ -56,7 +56,7 @@ project-name/
 | **Caracteristică** | **Tip** | **Unitate** | **Descriere** | **Domeniu valori** |
 |-------------------|---------|-------------|---------------|--------------------|
 | crankshaft_position_sensor | numeric | rpm | [Masurarea turatiilor] | 0–6000 |
-| speed | categorial | numeric | km/h | [senzor ABS sau senzor de viteza VVS sau WWS]  | 0-250 |
+| speed | numeric | numeric | km/h | [senzor ABS sau senzor de viteza VVS sau WWS]  | 0-250 |
 | throttle_position | percentage | % | [TPS pozitia pedalei de acceleratie] | 0–100 |
 | braking | percentage | % | [BPPS pozitia pedalei de frana] | 0–100 |
 | tilt_sensor | degrees | ° | [Senzor cu plaja completa de masurare pentru toate automobilele] | ±90° |
