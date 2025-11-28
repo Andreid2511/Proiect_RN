@@ -19,19 +19,19 @@ Acest document descrie activitățile realizate în **Etapa 3**, în care se ana
 project-name/
 ├── README.md
 ├── docs/
-│   └── datasets/          # descriere seturi de date, surse, diagrame
+│   └── datasets/          # descriere seturi de date, surse, diagrame (EDA)
 ├── data/
-│   ├── raw/               # date brute
-│   ├── processed/         # date curățate și transformate
-│   ├── train/             # set de instruire
-│   ├── validation/        # set de validare
-│   └── test/              # set de testare
+│   ├── raw/               # date brute (export CSV din LabVIEW)
+│   ├── processed/         # date curățate și normalizate
+│   ├── train/             # set de instruire (70%)
+│   ├── validation/        # set de validare (15%)
+│   └── test/              # set de testare (15%)
 ├── src/
-│   ├── preprocessing/     # funcții pentru preprocesare
-│   ├── data_acquisition/  # generare / achiziție date (dacă există)
+│   ├── preprocessing/     # scripturi Python pentru scalare/curățare
+│   ├── data_acquisition/  # VI-ul de LabVIEW pentru generare
 │   └── neural_network/    # implementarea RN (în etapa următoare)
-├── config/                # fișiere de configurare
-└── requirements.txt       # dependențe Python (dacă aplicabil)
+├── config/                # fișiere de configurare (ex: parametri normalizare)
+└── requirements.txt       # dependențe Python (pandas, numpy, scikit-learn, matplotlib)
 ```
 
 ---
@@ -46,7 +46,7 @@ project-name/
 
 ### 2.2 Caracteristicile dataset-ului
 
-* **Număr total de observații:** 1000
+* **Număr total de observații:** ~50.000 (5 sesiuni x 10.000 eșantioane)
 * **Număr de caracteristici (features):** 6
 * **Tipuri de date:** ☑ Numerice / ☑ Temporale
 * **Format fișiere:** ☑ CSV
@@ -61,6 +61,7 @@ project-name/
 | braking | percentage | % | [BPPS pozitia pedalei de frana] | 0–100 |
 | tilt_sensor | degrees | ° | [Senzor cu plaja completa de masurare pentru toate automobilele] | ±90° |
 | time | numeric | s | [Timpul de la pornire] | 0–100 |
+| driving_style_label | categorial | - | [TARGET] Eticheta stilului de condus(generata de simulator) | 0(Calm), 1(Normal), 2(Agresiv) |
 
 **Fișier recomandat:**  `data/README.md`
 
@@ -72,18 +73,17 @@ project-name/
 
 Asupra celor 6 caracteristici (crankshaft position, speed, throttle, braking, tilt, time) au fost calculate:
 
-* **Media** – pentru a observa nivelul mediu al fiecărui senzor
-* **Mediana** – pentru a reduce influența valorilor extreme
-* **Deviația standard** – pentru a măsura variabilitatea fiecărei măsurători
-* **Min–Max** – pentru a identifica domeniul real folosit
-* **Distribuții pe caracteristici** (histograme)
-* **Identificarea outlierilor** (IQR / percentile)
+* **Media și Mediana** – Comparate pentru a detecta asimetrii (ex: viteza medie urban vs autostradă)
+* **Deviația standard** – Indicator pentru variabilitate (ex: deviație mare la throttle indică stil agresiv)
+* **Min–Max** – Verificarea limitelor fizice (ex: RPM nu scade sub 800, Frâna nu depășește 100%)
+* **Distribuții(histograme)** S-a observat o distribuție bimodală a vitezei (relanti vs croazieră(cruise control))
+* **Matricea de Corelație** Confirmarea legăturilor fizice (corelație pozitivă puternică între throttle și rpm)
 
 ### 3.2 Analiza calității datelor
 
-* **Detectarea valorilor lipsă** (% pe coloană)
-* **Detectarea valorilor inconsistente sau eronate**
-* **Identificarea caracteristicilor redundante sau puternic corelate**
+* **Detectarea valorilor lipsă** 0% valori lipsă (date generate controlat)
+* **Detectarea valorilor inconsistente sau eronate** Algoritmul LabVIEW conține limite de saturație, deci nu există valori imposibile (ex: viteză negativă)
+* **Redundanță** Există o corelație naturală între speed și rpm, esențială pentru ca rețeaua să învețe fizica transmisiei
 
 ### 3.3 Probleme identificate
 
@@ -105,16 +105,16 @@ Asupra celor 6 caracteristici (crankshaft position, speed, throttle, braking, ti
 
 ### 4.2 Transformarea caracteristicilor
 
-* **Normalizare:** Min–Max / Standardizare
-* **Encoding pentru variabile categoriale**
+* **Min-Max Scaling (0...1):** Aplicat pentru throttle_position și braking (procente finite)
+* **Encoding (Target):** Eticheta driving_style_label păstrată numeric (0, 1, 2) pentru calculul erorii (Loss Function)
 * **Ajustarea dezechilibrului de clasă** (dacă este cazul)
 
 ### 4.3 Structurarea seturilor de date
 
-**Împărțire recomandată:**
-* 70–80% – train
-* 10–15% – validation
-* 10–15% – test
+**Dataset-ul total (~50.000 observații) a fost amestecat (shuffled) și împărțit astfel:**
+* 70% – Train: Antrenare.
+* 15% – Validation: Optimizare hiperparametri.
+* 15% – Test: Evaluare finală.
 
 **Principii respectate:**
 * Stratificare pentru clasificare
