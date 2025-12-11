@@ -2,14 +2,14 @@
 
 **Disciplina:** Rețele Neuronale  
 **Instituție:** POLITEHNICA București – FIIR  
-**Student:** Boata Andrei-Darius 
-**Data:** 21.11.2025 
+**Student:** Boață Andrei-Darius
+**Data:** 10/12/2025  
 
 ---
 
 ## Introducere
 
-Acest document descrie activitățile realizate în **Etapa 3**, în care se analizează și se preprocesează setul de date necesar proiectului „Rețele Neuronale". Scopul etapei este pregătirea corectă a datelor pentru instruirea modelului RN, respectând bunele practici privind calitatea, consistența și reproductibilitatea datelor.
+Acest document descrie activitățile realizate în **Etapa 3** pentru proiectul **"Sistem de Recunoaștere a Stilului de Condus și Adaptare Inteligentă a Transmisiei"**. Scopul etapei este pregătirea unui set de date sintetic, dar realist fizic, care să permită antrenarea unui model RN capabil să clasifice stilul de condus (Eco, Normal, Agresiv) indiferent de condițiile de drum (pantă, limită de viteză).
 
 ---
 
@@ -19,19 +19,19 @@ Acest document descrie activitățile realizate în **Etapa 3**, în care se ana
 project-name/
 ├── README.md
 ├── docs/
-│   └── datasets/          # descriere seturi de date, surse, diagrame (EDA)
+│   └── datasets/          # grafice distribuție RPM vs Speed
 ├── data/
-│   ├── raw/               # date brute (export CSV din LabVIEW)
-│   ├── processed/         # date curățate și normalizate
+│   ├── raw/               # date brute (generate de simulator)
+│   ├── processed/         # date curățate (dacă este cazul)
 │   ├── train/             # set de instruire (70%)
 │   ├── validation/        # set de validare (15%)
 │   └── test/              # set de testare (15%)
 ├── src/
-│   ├── preprocessing/     # scripturi Python pentru scalare/curățare
-│   ├── data_acquisition/  # VI-ul de LabVIEW pentru generare
-│   └── neural_network/    # implementarea RN (în etapa următoare)
-├── config/                # fișiere de configurare (ex: parametri normalizare)
-└── requirements.txt       # dependențe Python (pandas, numpy, scikit-learn, matplotlib)
+│   ├── preprocessing/     # scalare date (StandardScaler)
+│   ├── data_acquisition/  # script generator (generate_data.py)
+│   └── neural_network/    # implementarea RN (train_model.py)
+├── config/                # fișiere model salvat (.pkl)
+└── requirements.txt       # pandas, numpy, scikit-learn, joblib, tkinter
 ```
 
 ---
@@ -40,30 +40,30 @@ project-name/
 
 ### 2.1 Sursa datelor
 
-* **Origine:** Date generate programatic pe baza unui mix de traseu (urban + extraurban + autostradă), care modelează comportamentul vehiculului în accelerare, decelerare și viteze constante.
-* **Modul de achiziție:** ☑ Generare programatică (simulare)
-* **Perioada / condițiile colectării:** Setul de date a fost generat în cadrul proiectului, folosind parametrii de condus definiți de mine (accelerații, frânări, timpi, distanțe, viteze pe segmente).
+* **Origine:** Date generate programatic prin simulare fizică avansată.
+* **Modul de achiziție:** ☐ Senzori reali / ☑ Simulare / ☐ Fișier extern / ☑ Generare programatică
+* **Perioada / condițiile colectării:** Datele simulează comportamentul unui vehicul clasa B (ex: VW Polo 70-90CP) cu cutie automată ZF 8HP, în scenarii variate: Urban (Stop&Go), Extra-urban (serpentine) și Autostradă.
 
 ### 2.2 Caracteristicile dataset-ului
 
-* **Număr total de observații:** ~50.000 (5 sesiuni x 10.000 eșantioane)
-* **Număr de caracteristici (features):** 6
-* **Tipuri de date:** ☑ Numerice / ☑ Temporale
-* **Format fișiere:** ☑ CSV
+* **Număr total de observații:** ~50,000 (5 sesiuni a câte 10,000 eșantioane).
+* **Număr de caracteristici (features):** 6 Features de intrare + 1 Target.
+* **Tipuri de date:** ☑ Numerice / ☑ Categoriale (Target) / ☑ Temporale / ☐ Imagini
+* **Format fișiere:** ☑ CSV / ☐ TXT / ☐ JSON / ☐ PNG / ☐ Altele: [...]
 
 ### 2.3 Descrierea fiecărei caracteristici
 
 | **Caracteristică** | **Tip** | **Unitate** | **Descriere** | **Domeniu valori** |
 |-------------------|---------|-------------|---------------|--------------------|
-| crankshaft_position_sensor | numeric | rpm | [Masurarea turatiilor] | 0–6000 |
-| speed | numeric | numeric | km/h | [senzor ABS sau senzor de viteza VVS sau WWS]  | 0-250 |
-| throttle_position | percentage | % | [TPS pozitia pedalei de acceleratie] | 0–100 |
-| braking | percentage | % | [BPPS pozitia pedalei de frana] | 0–100 |
-| tilt_sensor | degrees | ° | [Senzor cu plaja completa de masurare pentru toate automobilele] | ±90° |
-| time | numeric | s | [Timpul de la pornire] | 0–100 |
-| driving_style_label | categorial | - | [TARGET] Eticheta stilului de condus(generata de simulator) | 0(Calm), 1(Normal), 2(Agresiv) |
+| rpm | numeric | rot/min | Turația motorului | 800 – 7000 |
+| speed | numeric | km/h | Viteza vehiculului | 0 – 250 |
+| throttle | numeric | % | Poziția pedalei de accelerație | 0 – 100 |
+| brake | numeric | % | Poziția pedalei de frână | 0 – 100 |
+| tilt | numeric | grade | Înclinația drumului (rampă/pantă) | -15 ... +15 |
+| gear | numeric | - | Treapta de viteză curentă | 1 – 8 |
+| style_label | categorial | - | Eticheta stilului (Eco/Normal/Sport) | {0, 1, 2} |
 
-**Fișier recomandat:**  `data/README.md`
+**Fișier recomandat:** `data/README.md`
 
 ---
 
@@ -71,25 +71,20 @@ project-name/
 
 ### 3.1 Statistici descriptive aplicate
 
-Asupra celor 6 caracteristici (crankshaft position, speed, throttle, braking, tilt, time) au fost calculate:
-
-* **Media și Mediana** – Comparate pentru a detecta asimetrii (ex: viteza medie urban vs autostradă)
-* **Deviația standard** – Indicator pentru variabilitate (ex: deviație mare la throttle indică stil agresiv)
-* **Min–Max** – Verificarea limitelor fizice (ex: RPM nu scade sub 800, Frâna nu depășește 100%)
-* **Distribuții(histograme)** S-a observat o distribuție bimodală a vitezei (relanti vs croazieră(cruise control))
-* **Matricea de Corelație** Confirmarea legăturilor fizice (corelație pozitivă puternică între throttle și rpm)
+* **Medie și deviație standard:** Calculate pentru RPM și Speed pentru a verifica realismul fizic (ex: RPM mediu ~2000 pentru Eco, ~4000 pentru Sport).
+* **Distribuții:** Histogramele arată o distribuție bimodală a vitezei (opriri dese în urban vs viteză constantă pe autostradă).
+* **Identificarea outlierilor:** Valori extreme de accelerație pe pante abrupte au fost verificate pentru consistență fizică.
 
 ### 3.2 Analiza calității datelor
 
-* **Detectarea valorilor lipsă** 0% valori lipsă (date generate controlat)
-* **Detectarea valorilor inconsistente sau eronate** Algoritmul LabVIEW conține limite de saturație, deci nu există valori imposibile (ex: viteză negativă)
-* **Redundanță** Există o corelație naturală între speed și rpm, esențială pentru ca rețeaua să învețe fizica transmisiei
+* **Detectarea valorilor lipsă:** 0% (datele sunt generate controlat).
+* **Consistență:** S-a verificat corelația RPM-Viteză-Treaptă (rapoartele de transmisie fixe).
+* **Corelații:** Corelație puternică între `throttle` și `style_label`, dar moderată de `tilt` (panta).
 
 ### 3.3 Probleme identificate
 
-* [exemplu] Feature X are 8% valori lipsă
-* [exemplu] Distribuția feature Y este puternic neuniformă
-* [exemplu] Variabilitate ridicată în clase (class imbalance)
+* **Provocare:** Inițial, urcarea unui deal cu accelerația la maxim era clasificată greșit ca "Agresiv".
+* **Soluție:** S-a introdus variabila `tilt` în setul de date și logica de compensare în generator, astfel încât "Pedală mare + Viteză mică + Pantă mare" = Normal, nu Agresiv.
 
 ---
 
@@ -97,54 +92,49 @@ Asupra celor 6 caracteristici (crankshaft position, speed, throttle, braking, ti
 
 ### 4.1 Curățarea datelor
 
-* **Eliminare duplicatelor**
-* **Tratarea valorilor lipsă:**
-  * Feature A: imputare cu mediană
-  * Feature B: eliminare (30% valori lipsă)
-* **Tratarea outlierilor:** IQR / limitare percentile
+* **Eliminare duplicatelor:** Nu a fost necesar.
+* **Tratarea zgomotului:** S-a introdus o funcție de "Smoothing" (inerție) la pedale în generator pentru a evita mișcările bruște nerealiste (jitter).
 
 ### 4.2 Transformarea caracteristicilor
 
-* **Min-Max Scaling (0...1):** Aplicat pentru throttle_position și braking (procente finite)
-* **Encoding (Target):** Eticheta driving_style_label păstrată numeric (0, 1, 2) pentru calculul erorii (Loss Function)
-* **Ajustarea dezechilibrului de clasă** (dacă este cazul)
+* **Normalizare (StandardScaler):** Aplicată tuturor caracteristicilor numerice (`rpm`, `speed`, `throttle`, `brake`, `tilt`, `gear`) pentru a aduce valorile la o scară comună (medie 0, deviație 1), esențială pentru convergența Rețelei Neuronale MLP.
+* **Encoding:** Target-ul `style_label` este deja numeric (0, 1, 2).
 
 ### 4.3 Structurarea seturilor de date
 
-**Dataset-ul total (~50.000 observații) a fost amestecat (shuffled) și împărțit astfel:**
-* 70% – Train: Antrenare.
-* 15% – Validation: Optimizare hiperparametri.
-* 15% – Test: Evaluare finală.
+**Împărțire realizată:**
+* 70% – train (35,000 samples)
+* 15% – validation (7,500 samples)
+* 15% – test (7,500 samples)
 
 **Principii respectate:**
-* Stratificare pentru clasificare
-* Fără scurgere de informație (data leakage)
-* Statistici calculate DOAR pe train și aplicate pe celelalte seturi
+* **Shuffling:** Datele au fost amestecate aleatoriu înainte de salvare pentru a elimina dependența temporală, obligând rețeaua să învețe corelațiile dintre senzori, nu ordinea secvențială.
+* **Stratificare:** S-a asigurat prezența tuturor celor 3 stiluri în toate seturile.
 
 ### 4.4 Salvarea rezultatelor preprocesării
 
-* Date preprocesate în `data/processed/`
-* Seturi train/val/test în foldere dedicate
-* Parametrii de preprocesare în `config/preprocessing_config.*` (opțional)
+* Datele sunt salvate în format CSV în folderele `data/train`, `data/validation`, `data/test`.
+* Obiectul de scalare (`scaler.pkl`) este salvat în `config/` pentru a fi folosit ulterior în aplicația live.
 
 ---
 
 ##  5. Fișiere Generate în Această Etapă
 
-* `data/raw/` – date brute
-* `data/processed/` – date curățate & transformate
-* `data/train/`, `data/validation/`, `data/test/` – seturi finale
-* `src/preprocessing/` – codul de preprocesare
-* `data/README.md` – descrierea dataset-ului
+* `data/raw/` – (Nu se aplică, datele sunt generate direct procesate)
+* `data/train/train.csv` – Set antrenare
+* `data/validation/validation.csv` – Set validare
+* `data/test/test.csv` – Set testare
+* `src/data_acquisition/generate_data.py` – Codul generatorului fizic
+* `src/neural_network/train_model.py` – Codul de preprocesare și antrenare
 
 ---
 
 ##  6. Stare Etapă (de completat de student)
 
-- [ ] Structură repository configurată
-- [ ] Dataset analizat (EDA realizată)
-- [ ] Date preprocesate
-- [ ] Seturi train/val/test generate
-- [ ] Documentație actualizată în README + `data/README.md`
+- [x] Structură repository configurată
+- [x] Dataset analizat (EDA realizată)
+- [x] Date preprocesate (Generate cu logică Smooth & Shuffled)
+- [x] Seturi train/val/test generate
+- [x] Documentație actualizată în README + `data/README.md`
 
 ---
