@@ -2,82 +2,196 @@ import pandas as pd
 import numpy as np
 import os
 import joblib
-from sklearn.neural_network import MLPClassifier
+import matplotlib.pyplot as plt
+import seaborn as sns
+import json
+import yaml  # Pentru fisierul de parametri (poate necesita 'pip install pyyaml', dar folosim scriere directa text)
+
+import tensorflow as tf
+from keras.models import Sequential
+from keras.layers import Dense, Input
+from keras.callbacks import EarlyStopping, ModelCheckpoint
+from keras.optimizers import Adam
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import classification_report, accuracy_score, confusion_matrix
+from keras.utils import to_categorical
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score, f1_score
 
-# --- 1. SETUP CAI (PATHS) ---
+# --- 1. CONFIGURARE & HIPERPARAMETRI ---
+print(f"--- ANTRENAMENT KERAS FINAL (GPU Disponibil: {len(tf.config.list_physical_devices('GPU')) > 0}) ---")
+
+# Definim parametrii aici pentru a-i salva ulterior in YAML
+PARAMS = {
+    "architecture": "Dense(32, tanh) -> Dense(32, tanh) -> Dense(16, tanh) -> Dense(3, softmax)",
+    "learning_rate": 0.001,
+    "batch_size": 32,
+    "epochs": 150,
+    "optimizer": "Adam",
+    "loss": "categorical_crossentropy",
+    "patience": 15
+}
+
+# Cai foldere
 current_dir = os.path.dirname(os.path.abspath(__file__))
-# Data e in ../../data
-data_dir = os.path.abspath(os.path.join(current_dir, "../../data"))
-# Config e in ../../config (aici salvam modelul)
-config_dir = os.path.abspath(os.path.join(current_dir, "../../config"))
-os.makedirs(config_dir, exist_ok=True)
+base_dir = os.path.abspath(os.path.join(current_dir, "../../"))
+data_dir = os.path.join(base_dir, "data")
+config_dir = os.path.join(base_dir, "config")
+models_dir = os.path.join(base_dir, "models")
+docs_dir = os.path.join(base_dir, "docs")
+results_dir = os.path.join(base_dir, "results")
 
-print("--- INCEPERE ANTRENARE ---")
+# Creare foldere daca nu exista
+for d in [config_dir, models_dir, docs_dir, results_dir]:
+    os.makedirs(d, exist_ok=True)
 
 # --- 2. INCARCARE DATE ---
-print("1. Incarc datele din CSV...")
+print("1. Incarc datele...")
 try:
     train_df = pd.read_csv(os.path.join(data_dir, "train", "train.csv"))
     val_df = pd.read_csv(os.path.join(data_dir, "validation", "validation.csv"))
+    test_df = pd.read_csv(os.path.join(data_dir, "test", "test.csv"))
 except FileNotFoundError:
-    print("EROARE: Nu gasesc CSV-urile! Ruleaza intai generate_data.py")
+    print("EROARE: Nu gasesc CSV-urile! Ruleaza generate_data.py")
     exit()
 
-# Definim intrarile (Senzorii) si Iesirea (Eticheta)
-# Folosim RPM, Speed, Throttle, Brake, Tilt. 
-# Nu folosim 'gear' neaparat, dar ajuta. Hai sa-l includem pentru precizie maxima.
-features = ['rpm', 'speed', 'throttle', 'brake', 'tilt', 'gear']
+features = ['rpm', 'speed', 'acceleration', 'throttle', 'brake', 'tilt', 'gear']
 target = 'style_label'
 
-X_train = train_df[features]
-y_train = train_df[target]
+X_train, y_train = train_df[features].values, train_df[target].values
+X_val, y_val = val_df[features].values, val_df[target].values
+X_test, y_test = test_df[features].values, test_df[target].values
 
-X_val = val_df[features]
-y_val = val_df[target]
-
-print(f"   Date antrenare: {len(X_train)} linii")
-print(f"   Date validare: {len(X_val)} linii")
-
-# --- 3. PREPROCESARE (SCALARE) ---
-print("2. Standardizez datele (Scalare)...")
-# Retelele Neuronale au nevoie ca toate intrarile sa aiba aceeasi scara (aprox -1...1)
+# --- 3. PREPROCESARE ---
+print("2. Preprocesare (Scalare + OneHot)...")
 scaler = StandardScaler()
 X_train_scaled = scaler.fit_transform(X_train)
 X_val_scaled = scaler.transform(X_val)
+X_test_scaled = scaler.transform(X_test)
 
-# --- 4. CONFIGURARE SI ANTRENARE RETEA ---
-print("3. Construiesc Reteaua Neuronala (MLP)...")
-# Am crescut putin capacitatea pentru a intelege modelele complexe de trafic
-mlp = MLPClassifier(
-    hidden_layer_sizes=(32, 16), # 2 straturi ascunse
-    activation='relu',       # Functia de activare standard
-    solver='adam',           # Algoritmul de optimizare
-    max_iter=1000,           # Numar maxim de epoci (mai multe pt convergenta)
-    random_state=42,
-    verbose=True             # Ne arata progresul (Loss-ul)
+y_train_cat = to_categorical(y_train, 3)
+y_val_cat = to_categorical(y_val, 3)
+y_test_cat = to_categorical(y_test, 3)
+
+# --- 4. DEFINIRE MODEL ---
+print("3. Construiesc modelul...")
+
+def build_model():
+    model = Sequential([
+        Input(shape=(7,)),
+        Dense(32, activation='tanh'),
+        Dense(32, activation='tanh'),
+        Dense(16, activation='tanh'),
+        Dense(3, activation='softmax')
+    ])
+    opt = Adam(learning_rate=PARAMS["learning_rate"])
+    model.compile(loss=PARAMS["loss"], optimizer=opt, metrics=['accuracy'])
+    return model
+
+model = build_model()
+
+# [CERINTA README] Salvare model neantrenat (untrained)
+untrained_path = os.path.join(models_dir, 'untrained_model.keras')
+model.save(untrained_path)
+print(f"   -> Model neantrenat salvat in: {untrained_path}")
+
+# --- 5. ANTRENARE ---
+print("4. Start Antrenare...")
+
+early_stop = EarlyStopping(monitor='val_loss', patience=PARAMS["patience"], restore_best_weights=True, verbose=1)
+# Salvam modelul antrenat
+trained_path = os.path.join(models_dir, 'trained_model.keras')
+checkpoint = ModelCheckpoint(trained_path, monitor='val_loss', save_best_only=True)
+
+history = model.fit(
+    X_train_scaled, y_train_cat,
+    validation_data=(X_val_scaled, y_val_cat),
+    epochs=PARAMS["epochs"],
+    batch_size=PARAMS["batch_size"],
+    callbacks=[early_stop, checkpoint],
+    verbose=1
 )
 
-print("   Start Antrenare (poate dura cateva secunde)...")
-mlp.fit(X_train_scaled, y_train)
+# --- 6. SALVARE REZULTATE (RESULTS FOLDER) ---
+print("5. Salvez rezultatele cerute in README...")
 
-# --- 5. EVALUARE ---
-print("4. Evaluare Model...")
-predictions = mlp.predict(X_val_scaled)
-acc = accuracy_score(y_val, predictions)
-print(f"   ACURATETE PE VALIDARE: {acc * 100:.2f}%")
+# A. Training History CSV
+history_df = pd.DataFrame(history.history)
+history_csv_path = os.path.join(results_dir, "training_history.csv")
+history_df.to_csv(history_csv_path, index_label="epoch")
+print(f"   -> Training history salvat in: {history_csv_path}")
 
-print("\nRaport Detaliat:")
-print(classification_report(y_val, predictions, target_names=['Urban (0)', 'Extra (1)', 'Auto (2)']))
+# B. Hyperparameters YAML
+yaml_content = f"""
+model_name: "SIA_Driver_Classifier"
+framework: "Keras"
+parameters:
+  learning_rate: {PARAMS['learning_rate']}
+  batch_size: {PARAMS['batch_size']}
+  architecture: "{PARAMS['architecture']}"
+  optimizer: "{PARAMS['optimizer']}"
+  loss_function: "{PARAMS['loss']}"
+"""
+with open(os.path.join(results_dir, "hyperparameters.yaml"), "w") as f:
+    f.write(yaml_content.strip())
+print(f"   -> Hyperparameters salvati in results/hyperparameters.yaml")
 
-# Matricea de confuzie ne arata unde greseste
-print("\nMatrice de Confuzie:")
-print(confusion_matrix(y_val, predictions))
+# --- 7. GRAFICE & EVALUARE ---
+print("6. Generez grafice si metrici finale...")
 
-# --- 6. SALVARE ---
-print("5. Salvare Model si Scaler...")
-joblib.dump(mlp, os.path.join(config_dir, 'driver_model.pkl'))
+# Grafic Loss
+plt.figure(figsize=(10, 6))
+plt.plot(history.history['loss'], label='Training Loss', color='blue')
+plt.plot(history.history['val_loss'], label='Validation Loss', color='orange')
+plt.title('Loss Curve')
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
+plt.legend()
+plt.grid(True)
+plt.savefig(os.path.join(docs_dir, "loss_curve.png"))
+
+# Metrici Test
+predictions_prob = model.predict(X_test_scaled)
+predictions = np.argmax(predictions_prob, axis=1)
+
+# C. Test Metrics JSON
+test_acc = accuracy_score(y_test, predictions)
+test_f1 = f1_score(y_test, predictions, average='macro')
+
+metrics_dict = {
+    "test_accuracy": float(test_acc),
+    "test_f1_macro": float(test_f1),
+    "report": classification_report(y_test, predictions, target_names=['Eco', 'Normal', 'Agresiv'], output_dict=True)
+}
+
+with open(os.path.join(results_dir, "test_metrics.json"), "w") as f:
+    json.dump(metrics_dict, f, indent=4)
+print(f"   -> Metrici JSON salvate in results/test_metrics.json")
+
+print("\n--- REPORT ---")
+print(classification_report(y_test, predictions, target_names=['Eco', 'Normal', 'Agresiv']))
+
+# Matrice Confuzie
+cm = confusion_matrix(y_test, predictions)
+plt.figure(figsize=(8, 6))
+sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=['Eco', 'Normal', 'Agresiv'], yticklabels=['Eco', 'Normal', 'Agresiv'])
+plt.title('Matrice de Confuzie')
+plt.savefig(os.path.join(docs_dir, "confusion_matrix.png"))
+
+# --- 8. SALVARE SCALER ---
 joblib.dump(scaler, os.path.join(config_dir, 'scaler.pkl'))
 
-print(f"GATA! Modelul a fost salvat in: {config_dir}")
+# --- BONUS: EXPORT ONNX (Nivel 3) ---
+try:
+    import tf2onnx
+    import onnx
+    print("7. [BONUS] Exporting to ONNX...")
+    spec = (tf.TensorSpec((None, 7), tf.float32, name="input"),)
+    output_path = os.path.join(models_dir, "final_model.onnx")
+    model_proto, _ = tf2onnx.convert.from_keras(model, input_signature=spec, opset=13)
+    onnx.save(model_proto, output_path)
+    print(f"   -> Model ONNX salvat: {output_path}")
+except ImportError:
+    print("   [INFO] tf2onnx nu este instalat. Skip bonus ONNX.")
+except Exception as e:
+    print(f"   [INFO] Eroare la export ONNX: {e}")
+
+print("✅ TOATE FISIERELE GENERATE CU SUCCES!")
