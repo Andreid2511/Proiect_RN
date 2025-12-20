@@ -16,20 +16,26 @@ from keras.models import load_model
 
 # --- SETUP ---
 current_dir = os.path.dirname(os.path.abspath(__file__))
-config_dir = os.path.abspath(os.path.join(current_dir, "../config"))
-models_dir = os.path.abspath(os.path.join(current_dir, "../models"))
+config_dir = os.path.abspath(os.path.join(current_dir, "../../config"))
+models_dir = os.path.abspath(os.path.join(current_dir, "../../models"))
 
 model_path = os.path.join(models_dir, "trained_model.keras") 
 scaler_path = os.path.join(config_dir, "scaler.pkl")
 
 MODEL_LOADED = False
+print(f"Attempting to load model from: {model_path}")
+print(f"Attempting to load scaler from: {scaler_path}")
 try:
     scaler = joblib.load(scaler_path)
+    print(f"✅ Scaler loaded successfully")
     model = load_model(model_path)
+    print(f"✅ Model loaded successfully")
     MODEL_LOADED = True
     print("✅ Model Keras (CPU Optimized) Incarcat! Lag Eliminat.")
 except Exception as e:
     print(f"EROARE MODEL: {e}")
+    import traceback
+    traceback.print_exc()
 
 class DashboardApp:
     def __init__(self, root):
@@ -137,6 +143,7 @@ class DashboardApp:
         
         self.canvas.create_text(685, 355, text=f"D{self.gear}", fill=gear_color, font=("Arial", 30, "bold"), tags="dynamic")
         self.canvas.create_text(685, 290, text=self.strategy_text, fill=gear_color, font=("Arial", 10, "bold"), tags="dynamic")
+        self.canvas.create_text(685, 270, text=self.justification_text, fill="white", font=("Arial", 9, "italic"), tags="dynamic")
 
         # 4. Pedale (Umplere)
         th_h = (self.throttle / 100) * 200 
@@ -162,6 +169,7 @@ class DashboardApp:
         
         conf_len = self.last_confidence * 200 
         self.canvas.create_rectangle(750, 240, 750 + conf_len, 245, fill=self.ai_color, outline="", tags="dynamic")
+        self.canvas.create_text(865, 255, text=f"Confidence: {int(self.last_confidence*100)}%", fill="white", font=("Arial", 10, "bold"), tags="dynamic")
 
     def reset_pedals(self):
         self.scale_th.set(0)
@@ -242,16 +250,32 @@ class DashboardApp:
         colors = {0: "#00ff00", 1: "#ffa500", 2: "#ff0000"}
         
         # Coasting Override
-        if self.throttle < 5 and self.brake < 5:
-            self.last_ai_prediction = 0
-            self.last_confidence = 1.0
-            
-        self.ai_status_text = labels.get(self.last_ai_prediction, "Unknown")
-        self.ai_color = colors.get(self.last_ai_prediction, "white")
-        
-        if self.throttle < 5 and self.brake < 5 and self.speed > 10:
+        if self.throttle < 2 and self.brake < 2 and self.speed > 5:
             self.ai_status_text = "COASTING"
             self.ai_color = "#00a8ff"
+            self.justification_text = "Rulare libera (Inertie)"
+        elif self.throttle < 2 and self.brake < 2:
+             # Stationare sau mers incet fara pedale
+             self.ai_status_text = labels.get(0, "Unknown")
+             self.ai_color = colors.get(0, "white")
+             self.justification_text = "Stationare / Relanti"
+        else:
+            self.ai_status_text = labels.get(self.last_ai_prediction, "Unknown")
+            self.ai_color = colors.get(self.last_ai_prediction, "white")
+            
+            #-- Justification Logic ---
+            if self.last_ai_prediction == 2 and self.speed < 61: # Sport
+                self.justification_text = "Imbunatatire consum (agresiv la viteze mici)"
+                if self.tilt > 3: self.justification_text += " + Panta"
+            elif self.last_ai_prediction == 2: # Sport
+                self.justification_text = "Conditii sportive (Viteza mare)"
+                if self.tilt > 3: self.justification_text += " + Panta"
+            elif self.last_ai_prediction == 0: # Eco
+                self.justification_text = "Pedala Constanta (Trafic Urban)"
+                if self.tilt > 3: self.justification_text += " + Panta"
+            else: # Normal
+                self.justification_text = "Regim de condus mixt"
+                if self.tilt > 3: self.justification_text += " + Panta"
 
         # --- Gearbox Logic ---
         upshift_rpm = 3000 

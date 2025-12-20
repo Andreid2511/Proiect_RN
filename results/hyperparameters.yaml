@@ -1,3 +1,8 @@
-architecture: Dense(32, tanh) -> Dense(32, tanh) -> Dense(16, tanh) -> Dense(3, softmax)
-learning_rate: 0.001
-optimizer: Adam
+model_name: "SIA_Driver_Classifier"
+framework: "Keras"
+parameters:
+  learning_rate: 0.001
+  batch_size: 32
+  architecture: "Dense(32, tanh) -> Dense(32, tanh) -> Dense(16, tanh) -> Dense(3, softmax)"
+  optimizer: "Adam"
+  loss_function: "categorical_crossentropy"
