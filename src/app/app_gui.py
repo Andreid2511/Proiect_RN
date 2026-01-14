@@ -194,10 +194,10 @@ class DashboardApp:
         ratios = {1: 4.7, 2: 3.1, 3: 2.1, 4: 1.7, 5: 1.3, 6: 1.0, 7: 0.8, 8: 0.6}
         gear_ratio = ratios.get(self.gear, 1.0)
         engine_torque = self.get_engine_torque(self.rpm)
-        base_power = 0.3
+        base_power = 0.12
         factor_frana = 2.5
-        gravity = 0.09
-        frecare = 0.06
+        gravity = 0.018
+        frecare = 0.01
         
         eff_throttle = 0 if self.brake > 5 else self.throttle
         push_force = (eff_throttle/100.0) * engine_torque * gear_ratio * base_power
@@ -280,7 +280,8 @@ class DashboardApp:
         # --- Gearbox Logic ---
         upshift_rpm = 3000 
         self.strategy_text = "STANDARD"
-        
+        kickdown_enabled = True
+
         if self.shift_timer > 0: self.shift_timer -= 1
         
         downshift_rpm = 1100 
@@ -293,9 +294,10 @@ class DashboardApp:
             downshift_rpm = 3000 
             upshift_rpm = 6000   
         elif self.last_ai_prediction == 2: 
-            if self.speed < 60: 
-                upshift_rpm = 2500; 
+            if self.speed < 60 and self.tilt < 5 :
+                upshift_rpm = 2800; 
                 self.strategy_text = "FORCED ECO"
+                kickdown_enabled = False
             else:
                 upshift_rpm = 5800
                 self.strategy_text = "SPORT MODE"
@@ -325,10 +327,10 @@ class DashboardApp:
 
             if self.rpm > upshift_rpm and self.gear < 8 and future_rpm > min_future and can_climb:
                 self.gear += 1
-                self.shift_timer = 10 
-            elif (self.rpm < downshift_rpm or (self.throttle > 85 and self.rpm < 3500)) and self.gear > 1:
+                self.shift_timer = 6
+            elif (self.rpm < downshift_rpm or (kickdown_enabled and self.throttle > 85 and self.rpm < 3500)) and self.gear > 1:
                 self.gear -= 1
-                self.shift_timer = 10 
+                self.shift_timer = 6 
 
         if self.speed < 2: self.gear = 1
 

@@ -26,11 +26,10 @@ def simulate_behavior(num_samples, style):
     
     ratios = {1: 4.7, 2: 3.1, 3: 2.1, 4: 1.7, 5: 1.3, 6: 1.0, 7: 0.8, 8: 0.6}
     
-    # Parametri Fizici (Sincronizati cu app_gui.py)
     factor_frana = 2.5
-    gravity = 0.06
-    frecare = 0.04
-    base_power = 0.45 
+    gravity = 0.018
+    frecare = 0.01
+    base_power = 0.055 
     
     current_speed_limit = 50 
     limit_timer = 0

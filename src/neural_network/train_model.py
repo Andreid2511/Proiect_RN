@@ -5,7 +5,7 @@ import joblib
 import matplotlib.pyplot as plt
 import seaborn as sns
 import json
-import yaml  # Pentru fisierul de parametri (poate necesita 'pip install pyyaml', dar folosim scriere directa text)
+import yaml
 
 import tensorflow as tf
 from keras.models import Sequential
@@ -19,7 +19,6 @@ from sklearn.metrics import classification_report, confusion_matrix, accuracy_sc
 # --- 1. CONFIGURARE & HIPERPARAMETRI ---
 print(f"--- ANTRENAMENT KERAS FINAL (GPU Disponibil: {len(tf.config.list_physical_devices('GPU')) > 0}) ---")
 
-# Definim parametrii aici pentru a-i salva ulterior in YAML
 PARAMS = {
     "architecture": "Dense(32, tanh) -> Dense(32, tanh) -> Dense(16, tanh) -> Dense(3, softmax)",
     "learning_rate": 0.001,
