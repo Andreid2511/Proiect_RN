@@ -1,0 +1,5 @@
+Experiment ID,Arhitectura,Accuracy,F1 Score,Inference Latency (ms),Training Time (s),Observatii
+EXP-01,Small (Rapid),0.8898,0.8889,0.1035,12.16,Sub-fit (Prea simplu)
+EXP-02,Baseline (Tanh),0.9218,0.9212,0.073,16.1,Optim
+EXP-03,Baseline (ReLU),0.931,0.9305,0.0701,11.25,Alternativă validă
+EXP-04,Large (Dropout),0.9394,0.9392,0.0783,11.75,Complex (Latență mare)

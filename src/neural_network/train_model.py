@@ -88,7 +88,7 @@ def build_model():
 model = build_model()
 
 # [CERINTA README] Salvare model neantrenat (untrained)
-untrained_path = os.path.join(models_dir, 'untrained_model.keras')
+untrained_path = os.path.join(models_dir, 'untrained_model.h5')
 model.save(untrained_path)
 print(f"   -> Model neantrenat salvat in: {untrained_path}")
 
@@ -97,7 +97,7 @@ print("4. Start Antrenare...")
 
 early_stop = EarlyStopping(monitor='val_loss', patience=PARAMS["patience"], restore_best_weights=True, verbose=1)
 # Salvam modelul antrenat
-trained_path = os.path.join(models_dir, 'trained_model.keras')
+trained_path = os.path.join(models_dir, 'trained_model.h5')
 checkpoint = ModelCheckpoint(trained_path, monitor='val_loss', save_best_only=True)
 
 history = model.fit(

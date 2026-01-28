@@ -29,7 +29,7 @@ def simulate_behavior(num_samples, style):
     factor_frana = 2.5
     gravity = 0.018
     frecare = 0.01
-    base_power = 0.055 
+    base_power = 0.14 
     
     current_speed_limit = 50 
     limit_timer = 0

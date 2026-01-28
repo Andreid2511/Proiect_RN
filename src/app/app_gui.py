@@ -19,7 +19,7 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 config_dir = os.path.abspath(os.path.join(current_dir, "../../config"))
 models_dir = os.path.abspath(os.path.join(current_dir, "../../models"))
 
-model_path = os.path.join(models_dir, "trained_model.keras") 
+model_path = os.path.join(models_dir, "trained_model.h5") 
 scaler_path = os.path.join(config_dir, "scaler.pkl")
 
 MODEL_LOADED = False
@@ -64,6 +64,10 @@ class DashboardApp:
         self.last_ai_prediction = 1 # Default Normal
         self.last_confidence = 0.0
 
+        self.session_stats = {0: 0, 1: 0, 2: 0}
+        self.total_ai_frames = 0
+        self.dominant_style = "N/A"
+
         self.setup_dashboard()
         self.update_physics()
 
@@ -82,13 +86,13 @@ class DashboardApp:
 
         # Texte Statice
         self.canvas.create_text(150, 100, text="INPUT TELEMETRY", fill="gray", font=("Arial", 10))
-        self.canvas.create_text(865, 115, text="AI CONTEXT ANALYSIS", fill="gray", font=("Arial", 9))
+        self.canvas.create_text(885, 115, text="AI CONTEXT ANALYSIS", fill="gray", font=("Arial", 9))
         self.canvas.create_text(512, 400, text="km/h", fill="gray", font=("Arial", 12))
 
         # Chenare
         self.canvas.create_rectangle(100, 150, 130, 350, outline="#333333", width=2) # Throttle Box
         self.canvas.create_rectangle(170, 150, 200, 350, outline="#333333", width=2) # Brake Box
-        self.canvas.create_rectangle(750, 100, 980, 250, outline="#333333", width=2) # AI Box
+        self.canvas.create_rectangle(800, 100, 995, 250, outline="#333333", width=2) # AI Box
         self.canvas.create_rectangle(650, 320, 720, 390, outline="#333333", width=3) # Gear Box
 
         # Texte Pedale
@@ -97,7 +101,7 @@ class DashboardApp:
         
         # Controale Jos
         self.controls_frame = tk.Frame(self.root, bg="#111111")
-        self.canvas.create_window(512, 550, window=self.controls_frame, width=900, height=80)
+        self.canvas.create_window(512, 600, window=self.controls_frame, width=900, height=80)
         
         style = ttk.Style()
         style.theme_use('clam')
@@ -117,9 +121,26 @@ class DashboardApp:
 
         tk.Button(self.controls_frame, text="RESET", bg="red", fg="white", command=self.reset_pedals).grid(row=0, column=6, padx=10)
 
+        self.canvas.create_rectangle(785, 280, 1010, 500, outline="#333333", width=2)
+        
+        self.canvas.create_text(880, 300, text="LOGICA DE FUNCTIONARE", fill="#00a8ff", font=("Arial", 10, "bold"))
+        self.canvas.create_line(790, 315, 970, 315, fill="#333333", width=1)
+
+        info_text = (
+            "1. INPUT: Regleaza sliderele de jos\n"
+            "   (Acceleratie, Frana, Panta).\n\n"
+            "2. AI ANALYSIS: Reteaua Neuronala\n"
+            "   detecteaza stilul (Eco/Sport)\n"
+            "   bazat pe agresivitatea pedalei.\n\n"
+            "3. TRANSMISIE: Cutia se adapteaza:\n"
+            "   • ECO: Schimba la <2000 RPM\n"
+            "   • SPORT: Tine turația >4000 RPM\n"
+            "   • HILL: Retrogradeaza automat"
+        )
+        self.canvas.create_text(900, 405, text=info_text, fill="#cccccc", font=("Consolas", 8), justify="left")
     def draw_arc(self, x, y, r, start, extent, color, width, tags=None):
         self.canvas.create_arc(x-r, y-r, x+r, y+r, start=start, extent=extent, style=tk.ARC, outline=color, width=width, tags=tags)
-
+        
     def draw_dynamic_ui(self):
         self.canvas.delete("dynamic") 
 
@@ -164,16 +185,25 @@ class DashboardApp:
         self.canvas.create_text(cx, cy - 50, text=f"Panta: {int(self.tilt)}°", fill="white", tags="dynamic")
 
         # 6. AI Status
-        self.canvas.create_oval(840, 140, 890, 190, fill=self.ai_color, outline=self.ai_color, tags="dynamic")
-        self.canvas.create_text(865, 210, text=self.ai_status_text, fill=self.ai_color, font=("Arial", 14, "bold"), tags="dynamic")
+        self.canvas.create_oval(872, 140, 922, 190, fill=self.ai_color, outline=self.ai_color, tags="dynamic")
+        self.canvas.create_text(900, 210, text=self.ai_status_text, fill=self.ai_color, font=("Arial", 14, "bold"), tags="dynamic")
         
         conf_len = self.last_confidence * 200 
-        self.canvas.create_rectangle(750, 240, 750 + conf_len, 245, fill=self.ai_color, outline="", tags="dynamic")
-        self.canvas.create_text(865, 255, text=f"Confidence: {int(self.last_confidence*100)}%", fill="white", font=("Arial", 10, "bold"), tags="dynamic")
+        self.canvas.create_rectangle(805, 240, 805 + conf_len - 15, 245, fill=self.ai_color, outline="", tags="dynamic")
+        self.canvas.create_text(900, 255, text=f"Confidence: {int(self.last_confidence*100)}%", fill="white", font=("Arial", 10, "bold"), tags="dynamic")
+
+        stat_color = "#ffffff"
+        if "ECO" in self.dominant_style: stat_color = "#00ff00"
+        if "SPORT" in self.dominant_style: stat_color = "#ff0000"
+        if "NORMAL" in self.dominant_style: stat_color = "#ffa500"
+
+        self.canvas.create_text(865, 520, text="SESIUNE CURENTA:", fill="gray", font=("Arial", 9), tags="dynamic")
+        self.canvas.create_text(865, 540, text=self.dominant_style, fill=stat_color, font=("Arial", 14, "bold"), tags="dynamic")
 
     def reset_pedals(self):
         self.scale_th.set(0)
         self.scale_br.set(0)
+        self.scale_tilt.set(0)
         self.throttle = 0
         self.brake = 0
 
@@ -194,7 +224,7 @@ class DashboardApp:
         ratios = {1: 4.7, 2: 3.1, 3: 2.1, 4: 1.7, 5: 1.3, 6: 1.0, 7: 0.8, 8: 0.6}
         gear_ratio = ratios.get(self.gear, 1.0)
         engine_torque = self.get_engine_torque(self.rpm)
-        base_power = 0.12
+        base_power = 0.14
         factor_frana = 2.5
         gravity = 0.018
         frecare = 0.01
@@ -238,6 +268,15 @@ class DashboardApp:
                 prediction = np.argmax(probs)
                 self.last_confidence = probs[prediction]
                 
+                self.session_stats[prediction] += 1
+                self.total_ai_frames += 1
+                
+                best_style = max(self.session_stats, key=self.session_stats.get)
+                style_names = {0: "ECO", 1: "NORMAL", 2: "SPORT"}
+                
+                pct = (self.session_stats[best_style] / self.total_ai_frames) * 100
+                self.dominant_style = f"{style_names[best_style]} ({int(pct)}%)"
+
                 self.pred_history.append(prediction)
                 if len(self.pred_history) > 5: self.pred_history.pop(0) # Buffer mai mic
                 self.last_ai_prediction = max(set(self.pred_history), key=self.pred_history.count)
@@ -245,7 +284,6 @@ class DashboardApp:
             except Exception:
                 pass
 
-        # Update UI Labels based on cached prediction
         labels = {0: "ECO MODE", 1: "NORMAL", 2: "SPORT / AGRESIV"}
         colors = {0: "#00ff00", 1: "#ffa500", 2: "#ff0000"}
         
@@ -264,7 +302,9 @@ class DashboardApp:
             self.ai_color = colors.get(self.last_ai_prediction, "white")
             
             #-- Justification Logic ---
-            if self.last_ai_prediction == 2 and self.speed < 61: # Sport
+            if self.last_ai_prediction == 2 and self.throttle > 90: # Kickdown
+                self.justification_text = "Kickdown Activat"
+            elif self.last_ai_prediction == 2 and self.speed < 61: # Sport
                 self.justification_text = "Imbunatatire consum (agresiv la viteze mici)"
                 if self.tilt > 3: self.justification_text += " + Panta"
             elif self.last_ai_prediction == 2: # Sport
@@ -280,10 +320,15 @@ class DashboardApp:
         # --- Gearbox Logic ---
         upshift_rpm = 3000 
         self.strategy_text = "STANDARD"
-        kickdown_enabled = True
+        kickdown_enabled = False
 
         if self.shift_timer > 0: self.shift_timer -= 1
-        
+
+        if self.throttle > 90:
+            kickdown_enabled = True
+        else:
+            kickdown_enabled = False
+
         downshift_rpm = 1100 
         if self.tilt > 2:
             upshift_rpm += (self.tilt * 120) 
@@ -294,10 +339,9 @@ class DashboardApp:
             downshift_rpm = 3000 
             upshift_rpm = 6000   
         elif self.last_ai_prediction == 2: 
-            if self.speed < 60 and self.tilt < 5 :
+            if self.speed < 60 and self.tilt < 5 and kickdown_enabled == False:
                 upshift_rpm = 2800; 
                 self.strategy_text = "FORCED ECO"
-                kickdown_enabled = False
             else:
                 upshift_rpm = 5800
                 self.strategy_text = "SPORT MODE"
@@ -328,9 +372,10 @@ class DashboardApp:
             if self.rpm > upshift_rpm and self.gear < 8 and future_rpm > min_future and can_climb:
                 self.gear += 1
                 self.shift_timer = 6
-            elif (self.rpm < downshift_rpm or (kickdown_enabled and self.throttle > 85 and self.rpm < 3500)) and self.gear > 1:
+            elif (self.rpm < downshift_rpm or (kickdown_enabled and self.rpm < 3500)) and self.gear > 1:
                 self.gear -= 1
                 self.shift_timer = 6 
+                self.justification_text = "KICKDOWN ACTIVE"
 
         if self.speed < 2: self.gear = 1
 
