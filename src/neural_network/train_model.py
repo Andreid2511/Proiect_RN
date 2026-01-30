@@ -37,9 +37,10 @@ config_dir = os.path.join(base_dir, "config")
 models_dir = os.path.join(base_dir, "models")
 docs_dir = os.path.join(base_dir, "docs")
 results_dir = os.path.join(base_dir, "results")
+docs_results_dir = os.path.join(base_dir, "docs/results")
 
 # Creare foldere daca nu exista
-for d in [config_dir, models_dir, docs_dir, results_dir]:
+for d in [config_dir, models_dir, docs_dir, results_dir,docs_results_dir]:
     os.makedirs(d, exist_ok=True)
 
 # --- 2. INCARCARE DATE ---
@@ -87,7 +88,7 @@ def build_model():
 
 model = build_model()
 
-# [CERINTA README] Salvare model neantrenat (untrained)
+# Salvam modelul neantrenat pentru referinta
 untrained_path = os.path.join(models_dir, 'untrained_model.h5')
 model.save(untrained_path)
 print(f"   -> Model neantrenat salvat in: {untrained_path}")
@@ -109,8 +110,8 @@ history = model.fit(
     verbose=1
 )
 
-# --- 6. SALVARE REZULTATE (RESULTS FOLDER) ---
-print("5. Salvez rezultatele cerute in README...")
+# --- 6. SALVARE REZULTATE ---
+print("5. Salvez rezultatele cerute...")
 
 # A. Training History CSV
 history_df = pd.DataFrame(history.history)
@@ -134,36 +135,55 @@ with open(os.path.join(results_dir, "hyperparameters.yaml"), "w") as f:
 print(f"   -> Hyperparameters salvati in results/hyperparameters.yaml")
 
 # --- 7. GRAFICE & EVALUARE ---
-print("6. Generez grafice si metrici finale...")
+print("6. Generare learning_curves_best.png...")
 
-# Grafic Loss
-plt.figure(figsize=(10, 6))
-plt.plot(history.history['loss'], label='Training Loss', color='blue')
-plt.plot(history.history['val_loss'], label='Validation Loss', color='orange')
-plt.title('Loss Curve')
+acc = history.history['accuracy']
+val_acc = history.history['val_accuracy']
+loss = history.history['loss']
+val_loss = history.history['val_loss']
+epochs_range = range(1, len(acc) + 1)
+
+plt.figure(figsize=(14, 6))
+
+# Plot 1: Accuracy
+plt.subplot(1, 2, 1)
+plt.plot(epochs_range, acc, label='Training Accuracy', color='blue')
+plt.plot(epochs_range, val_acc, label='Validation Accuracy', color='orange', linestyle='--')
+plt.title('Training and Validation Accuracy')
 plt.xlabel('Epochs')
-plt.ylabel('Loss')
-plt.legend()
-plt.grid(True)
-plt.savefig(os.path.join(docs_dir, "loss_curve.png"))
+plt.ylabel('Accuracy')
+plt.legend(loc='lower right')
+plt.grid(True, alpha=0.3)
+
+# Plot 2: Loss
+plt.subplot(1, 2, 2)
+plt.plot(epochs_range, loss, label='Training Loss', color='blue')
+plt.plot(epochs_range, val_loss, label='Validation Loss', color='orange', linestyle='--')
+plt.title('Training and Validation Loss')
+plt.xlabel('Epochs')
+plt.ylabel('Loss (Eroare)')
+plt.legend(loc='upper right')
+plt.grid(True, alpha=0.3)
+
+save_img_path = os.path.join(docs_results_dir, "learning_curves_best.png")
 
 # Metrici Test
 predictions_prob = model.predict(X_test_scaled)
 predictions = np.argmax(predictions_prob, axis=1)
 
-# C. Test Metrics JSON
+# C. Final Metrics JSON
 test_acc = accuracy_score(y_test, predictions)
 test_f1 = f1_score(y_test, predictions, average='macro')
 
 metrics_dict = {
-    "test_accuracy": float(test_acc),
-    "test_f1_macro": float(test_f1),
+    "final_accuracy": float(test_acc),
+    "final_f1_macro": float(test_f1),
     "report": classification_report(y_test, predictions, target_names=['Eco', 'Normal', 'Agresiv'], output_dict=True)
 }
 
-with open(os.path.join(results_dir, "test_metrics.json"), "w") as f:
+with open(os.path.join(results_dir, "final_metrics.json"), "w") as f:
     json.dump(metrics_dict, f, indent=4)
-print(f"   -> Metrici JSON salvate in results/test_metrics.json")
+print(f"   -> Metrici JSON salvate in results/final_metrics.json")
 
 print("\n--- REPORT ---")
 print(classification_report(y_test, predictions, target_names=['Eco', 'Normal', 'Agresiv']))
@@ -172,11 +192,13 @@ print(classification_report(y_test, predictions, target_names=['Eco', 'Normal', 
 cm = confusion_matrix(y_test, predictions)
 plt.figure(figsize=(8, 6))
 sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=['Eco', 'Normal', 'Agresiv'], yticklabels=['Eco', 'Normal', 'Agresiv'])
-plt.title('Matrice de Confuzie')
-plt.savefig(os.path.join(docs_dir, "confusion_matrix.png"))
+plt.title('Matrice de Confuzie (Model Final)')
+plt.ylabel('Eticheta Reala')
+plt.xlabel('Predictia Modelului')
+plt.savefig(os.path.join(docs_dir, "confusion_matrix_optimized.png"))
 
 # --- 8. SALVARE SCALER ---
-joblib.dump(scaler, os.path.join(config_dir, 'scaler.pkl'))
+joblib.dump(scaler, os.path.join(config_dir, 'preprocessing_params.pkl'))
 
 # --- BONUS: EXPORT ONNX (Nivel 3) ---
 try:

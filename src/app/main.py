@@ -20,7 +20,7 @@ config_dir = os.path.abspath(os.path.join(current_dir, "../../config"))
 models_dir = os.path.abspath(os.path.join(current_dir, "../../models"))
 
 model_path = os.path.join(models_dir, "trained_model.h5") 
-scaler_path = os.path.join(config_dir, "scaler.pkl")
+scaler_path = os.path.join(config_dir, "preprocessing_params.pkl")
 
 MODEL_LOADED = False
 print(f"Attempting to load model from: {model_path}")

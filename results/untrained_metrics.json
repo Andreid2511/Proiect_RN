@@ -1,0 +1,43 @@
+{
+    "model_name": "untrained_model.h5",
+    "test_accuracy": 0.1777,
+    "test_f1_macro": 0.1718,
+    "inference_latency_ms": 0.0292,
+    "per_class_metrics": {
+        "Eco": {
+            "precision": 0.2234660033167496,
+            "recall": 0.2997108540925267,
+            "f1-score": 0.2560326809804294,
+            "support": 8992.0
+        },
+        "Normal": {
+            "precision": 0.24849334267694465,
+            "recall": 0.1981669833463731,
+            "f1-score": 0.22049496331302076,
+            "support": 8947.0
+        },
+        "Sport": {
+            "precision": 0.042152466367713005,
+            "recall": 0.03630945811720561,
+            "f1-score": 0.03901339973912012,
+            "support": 9061.0
+        }
+    },
+    "confusion_matrix": [
+        [
+            2695,
+            3,
+            6294
+        ],
+        [
+            5992,
+            1773,
+            1182
+        ],
+        [
+            3373,
+            5359,
+            329
+        ]
+    ]
+}

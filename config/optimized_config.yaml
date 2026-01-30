@@ -1,0 +1,23 @@
+architecture:
+  input_dim: 7
+  layers:
+  - activation: tanh
+    type: Dense
+    units: 32
+  - activation: tanh
+    type: Dense
+    units: 32
+  - activation: tanh
+    type: Dense
+    units: 16
+  - activation: softmax
+    type: Dense (Output)
+    units: 3
+model_name: SIA_INTELLIGENT_TRANSMISSION
+training:
+  batch_size: 32
+  early_stopping_patience: 15
+  epochs_limit: 150
+  loss: categorical_crossentropy
+  optimizer: adam
+version: 1.0.0
