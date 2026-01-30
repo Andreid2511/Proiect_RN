@@ -19,7 +19,7 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 config_dir = os.path.abspath(os.path.join(current_dir, "../../config"))
 models_dir = os.path.abspath(os.path.join(current_dir, "../../models"))
 
-model_path = os.path.join(models_dir, "trained_model.h5") 
+model_path = os.path.join(models_dir, "optimized_model.h5") 
 scaler_path = os.path.join(config_dir, "preprocessing_params.pkl")
 
 MODEL_LOADED = False
@@ -81,13 +81,13 @@ class DashboardApp:
 
         # Fundal Turometru
         self.draw_arc(512, 350, 250, 225, -270, "#1a1a1a", 20) 
-        self.canvas.create_text(280, 480, text="0", fill="gray", font=("Arial", 12))
-        self.canvas.create_text(744, 480, text="7", fill="red", font=("Arial", 12, "bold"))
+        self.canvas.create_text(300, 520, text="0", fill="gray", font=("Arial", 12))
+        self.canvas.create_text(730, 520, text="7", fill="red", font=("Arial", 12, "bold"))
 
         # Texte Statice
         self.canvas.create_text(150, 100, text="INPUT TELEMETRY", fill="gray", font=("Arial", 10))
         self.canvas.create_text(885, 115, text="AI CONTEXT ANALYSIS", fill="gray", font=("Arial", 9))
-        self.canvas.create_text(512, 400, text="km/h", fill="gray", font=("Arial", 12))
+        self.canvas.create_text(512, 410, text="km/h", fill="gray", font=("Arial", 12))
 
         # Chenare
         self.canvas.create_rectangle(100, 150, 130, 350, outline="#333333", width=2) # Throttle Box

@@ -1,132 +1,77 @@
 [
     {
-        "index": 53,
-        "true_label": "Normal",
-        "predicted_label": "Sport",
-        "confidence_prediction": 1.0,
-        "true_label_confidence": 0.0,
-        "input_data": {
-            "rpm": 3799.850026758696,
-            "speed": 58.03627503448423,
-            "throttle": 84.0,
-            "tilt": 8.414079673943514
-        }
-    },
-    {
         "index": 10437,
         "true_label": "Normal",
         "predicted_label": "Sport",
-        "confidence_prediction": 0.9998999834060669,
-        "true_label_confidence": 9.999999747378752e-05,
-        "input_data": {
+        "confidence": 1.0,
+        "input_features": {
             "rpm": 3798.555735528789,
             "speed": 58.0108967750743,
+            "acceleration": -0.0984928858061593,
             "throttle": 84.0,
-            "tilt": 8.864545970453209
-        }
-    },
-    {
-        "index": 19406,
-        "true_label": "Normal",
-        "predicted_label": "Eco",
-        "confidence_prediction": 0.9994000196456909,
-        "true_label_confidence": 0.0006000000284984708,
-        "input_data": {
-            "rpm": 1423.4873435544014,
-            "speed": 27.91151654028238,
-            "throttle": 0.0,
-            "tilt": -5.102749879384833
-        }
-    },
-    {
-        "index": 11262,
-        "true_label": "Normal",
-        "predicted_label": "Eco",
-        "confidence_prediction": 0.9983999729156494,
-        "true_label_confidence": 0.0015999999595806003,
-        "input_data": {
-            "rpm": 1414.4177036410526,
-            "speed": 9.712182295326611,
-            "throttle": 4.5,
-            "tilt": -11.892163756717148
+            "brake": 0.0,
+            "tilt": 8.864545970453209,
+            "gear": 4
         }
     },
     {
         "index": 12187,
         "true_label": "Sport",
         "predicted_label": "Normal",
-        "confidence_prediction": 0.9962000250816345,
-        "true_label_confidence": 0.003800000064074993,
-        "input_data": {
+        "confidence": 0.9999,
+        "input_features": {
             "rpm": 4134.018622757194,
             "speed": 52.12727972630467,
+            "acceleration": 0.0436557483018091,
             "throttle": 85.0,
-            "tilt": 10.308836520227288
+            "brake": 0.0,
+            "tilt": 10.308836520227288,
+            "gear": 3
         }
     },
     {
-        "index": 6519,
+        "index": 704,
+        "true_label": "Eco",
+        "predicted_label": "Normal",
+        "confidence": 0.9981,
+        "input_features": {
+            "rpm": 2016.9380560242853,
+            "speed": 50.56251425703296,
+            "acceleration": -0.2620755611279577,
+            "throttle": 4.5,
+            "brake": 0.0,
+            "tilt": -14.503743941576335,
+            "gear": 5
+        }
+    },
+    {
+        "index": 3859,
         "true_label": "Normal",
         "predicted_label": "Eco",
-        "confidence_prediction": 0.9929999709129333,
-        "true_label_confidence": 0.007000000216066837,
-        "input_data": {
-            "rpm": 1347.122677456511,
-            "speed": 34.54160711426951,
-            "throttle": 0.0,
-            "tilt": -13.753376328195854
+        "confidence": 0.9978,
+        "input_features": {
+            "rpm": 1506.824143789304,
+            "speed": 15.879829503110797,
+            "acceleration": -0.6572418515897844,
+            "throttle": 3.0,
+            "brake": 0.0,
+            "tilt": -4.53460318740071,
+            "gear": 2
         }
     },
     {
         "index": 12022,
         "true_label": "Sport",
         "predicted_label": "Normal",
-        "confidence_prediction": 0.9896000027656555,
-        "true_label_confidence": 0.010400000028312206,
-        "input_data": {
+        "confidence": 0.9976,
+        "input_features": {
             "rpm": 3876.02579184158,
             "speed": 48.825806219707616,
+            "acceleration": 0.0166905391181728,
             "throttle": 80.0,
-            "tilt": 11.499609566987122
-        }
-    },
-    {
-        "index": 45,
-        "true_label": "Normal",
-        "predicted_label": "Eco",
-        "confidence_prediction": 0.9829000234603882,
-        "true_label_confidence": 0.016100000590085983,
-        "input_data": {
-            "rpm": 1747.0203702463284,
-            "speed": 11.964683476924314,
-            "throttle": 6.0,
-            "tilt": -12.239569128023517
-        }
-    },
-    {
-        "index": 24777,
-        "true_label": "Normal",
-        "predicted_label": "Sport",
-        "confidence_prediction": 0.9819999933242798,
-        "true_label_confidence": 0.017999999225139618,
-        "input_data": {
-            "rpm": 3793.838622792903,
-            "speed": 58.50663966260594,
-            "throttle": 81.0,
-            "tilt": 7.3851239665483375
-        }
-    },
-    {
-        "index": 9040,
-        "true_label": "Normal",
-        "predicted_label": "Eco",
-        "confidence_prediction": 0.9805999994277954,
-        "true_label_confidence": 0.019300000742077827,
-        "input_data": {
-            "rpm": 1566.2314838400416,
-            "speed": 16.357327783226253,
-            "throttle": 4.5,
-            "tilt": -11.753700828306876
+            "brake": 0.0,
+            "tilt": 11.499609566987122,
+            "gear": 3
         }
     }
 ]

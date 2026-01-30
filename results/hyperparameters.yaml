@@ -3,6 +3,6 @@ framework: "Keras"
 parameters:
   learning_rate: 0.001
   batch_size: 32
-  architecture: "Dense(32, tanh) -> Dense(32, tanh) -> Dense(16, tanh) -> Dense(3, softmax)"
+  architecture: "Dense(32, relu) -> Dense(32, relu) -> Dense(16, relu) -> Dense(3, softmax)"
   optimizer: "Adam"
   loss_function: "categorical_crossentropy"

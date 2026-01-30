@@ -20,7 +20,7 @@ from sklearn.metrics import classification_report, confusion_matrix, accuracy_sc
 print(f"--- ANTRENAMENT KERAS FINAL (GPU Disponibil: {len(tf.config.list_physical_devices('GPU')) > 0}) ---")
 
 PARAMS = {
-    "architecture": "Dense(32, tanh) -> Dense(32, tanh) -> Dense(16, tanh) -> Dense(3, softmax)",
+    "architecture": "Dense(32, relu) -> Dense(32, relu) -> Dense(16, relu) -> Dense(3, softmax)",
     "learning_rate": 0.001,
     "batch_size": 32,
     "epochs": 150,
@@ -77,9 +77,9 @@ print("3. Construiesc modelul...")
 def build_model():
     model = Sequential([
         Input(shape=(7,)),
-        Dense(32, activation='tanh'),
-        Dense(32, activation='tanh'),
-        Dense(16, activation='tanh'),
+        Dense(32, activation='relu'),
+        Dense(32, activation='relu'),
+        Dense(16, activation='relu'),
         Dense(3, activation='softmax')
     ])
     opt = Adam(learning_rate=PARAMS["learning_rate"])
@@ -98,8 +98,8 @@ print("4. Start Antrenare...")
 
 early_stop = EarlyStopping(monitor='val_loss', patience=PARAMS["patience"], restore_best_weights=True, verbose=1)
 # Salvam modelul antrenat
-trained_path = os.path.join(models_dir, 'trained_model.h5')
-checkpoint = ModelCheckpoint(trained_path, monitor='val_loss', save_best_only=True)
+optimized_path = os.path.join(models_dir, 'optimized_model.h5')
+checkpoint = ModelCheckpoint(optimized_path, monitor='val_loss', save_best_only=True)
 
 history = model.fit(
     X_train_scaled, y_train_cat,
@@ -165,7 +165,9 @@ plt.ylabel('Loss (Eroare)')
 plt.legend(loc='upper right')
 plt.grid(True, alpha=0.3)
 
-save_img_path = os.path.join(docs_results_dir, "learning_curves_best.png")
+save_img_path = os.path.join(docs_results_dir, "learning_curves_final.png")
+plt.savefig(save_img_path)
+print(f"   -> Grafic salvat in: {save_img_path}")
 
 # Metrici Test
 predictions_prob = model.predict(X_test_scaled)

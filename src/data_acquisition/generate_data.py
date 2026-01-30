@@ -102,9 +102,6 @@ def simulate_behavior(num_samples, style):
         engine_torque = get_engine_torque(rpm)
         gear_ratio = ratios.get(gear, 1.0)
         
-        # AICI ERA PROBLEMA: 
-        # Inainte calculam delta "per pas" dar pasul era 0.1s. 
-        # Acum pasul e 0.033s, deci delta va fi automat mai mic, exact ca in GUI.
         
         eff_throttle = throttle
         if brake > 5: eff_throttle = 0
@@ -141,7 +138,7 @@ def simulate_behavior(num_samples, style):
         if rpm > upshift_point and gear < 8: gear += 1
         elif (rpm < 1100) and gear > 1: gear -= 1
             
-        # SALVAM DATE RAW (FARA ROUND)
+        # SALVARE DATE
         data.append([
             rpm, 
             speed, 

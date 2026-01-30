@@ -667,10 +667,3 @@ Exemplu:
 3. Push: `git push origin main --tags`
 
 ---
-
-**REMINDER:** Aceasta a fost ultima versiune pentru feedback. Următoarea predare este **VERSIUNEA FINALĂ PENTRU EXAMEN**!
-# TO DO
-1. Schimbat ui, descriere in dreapta sub status ai, modificat slidere sa fie mai usor de inteles ce fac, mutarea lor un pic mai jos
-2. Experimente minim 4
-3. Explicatie in readme etapa 6 de ce nu imi trebuie optimizare(date foarte simple, optimizarea nu este necesara)
-4. 

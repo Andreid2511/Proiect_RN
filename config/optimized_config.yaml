@@ -1,13 +1,13 @@
 architecture:
   input_dim: 7
   layers:
-  - activation: tanh
+  - activation: relu
     type: Dense
     units: 32
-  - activation: tanh
+  - activation: relu
     type: Dense
     units: 32
-  - activation: tanh
+  - activation: relu
     type: Dense
     units: 16
   - activation: softmax
