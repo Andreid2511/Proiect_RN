@@ -43,11 +43,12 @@ project-name/
 * **Origine:** Date generate programatic prin simulare fizică avansată.
 * **Modul de achiziție:** ☐ Senzori reali / ☑ Simulare / ☐ Fișier extern / ☑ Generare programatică
 * **Perioada / condițiile colectării:** Datele simulează comportamentul unui vehicul clasa B (ex: VW Polo 70-90CP) cu cutie automată ZF 8HP, în scenarii variate: Urban (Stop&Go), Extra-urban (serpentine) și Autostradă.
+* **Frecvență eșantionare:** 30 Hz (DT = 0.033s), sincronizat cu rata de refresh a aplicației finale.
 
 ### 2.2 Caracteristicile dataset-ului
 
-* **Număr total de observații:** ~50,000 (5 sesiuni a câte 10,000 eșantioane).
-* **Număr de caracteristici (features):** 6 Features de intrare + 1 Target.
+* **Număr total de observații:** **180,000** (3 stiluri x 60,000 eșantioane).
+* **Număr de caracteristici (features):** **7 Features de intrare** + 1 Target.
 * **Tipuri de date:** ☑ Numerice / ☑ Categoriale (Target) / ☑ Temporale / ☐ Imagini
 * **Format fișiere:** ☑ CSV / ☐ TXT / ☐ JSON / ☐ PNG / ☐ Altele: [...]
 
@@ -56,7 +57,8 @@ project-name/
 | **Caracteristică** | **Tip** | **Unitate** | **Descriere** | **Domeniu valori** |
 |-------------------|---------|-------------|---------------|--------------------|
 | rpm | numeric | rot/min | Turația motorului | 800 – 7000 |
-| speed | numeric | km/h | Viteza vehiculului | 0 – 250 |
+| speed | numeric | km/h | Viteza vehiculului | 0 – 260 |
+| acceleration | numeric | m/s² | Accelerația vehiculului (derivata vitezei) | -5 ... +5 |
 | throttle | numeric | % | Poziția pedalei de accelerație | 0 – 100 |
 | brake | numeric | % | Poziția pedalei de frână | 0 – 100 |
 | tilt | numeric | grade | Înclinația drumului (rampă/pantă) | -15 ... +15 |
@@ -97,19 +99,19 @@ project-name/
 
 ### 4.2 Transformarea caracteristicilor
 
-* **Normalizare (StandardScaler):** Aplicată tuturor caracteristicilor numerice (`rpm`, `speed`, `throttle`, `brake`, `tilt`, `gear`) pentru a aduce valorile la o scară comună (medie 0, deviație 1), esențială pentru convergența Rețelei Neuronale MLP.
+* **Normalizare (StandardScaler):** Aplicată tuturor caracteristicilor numerice (`rpm`, `speed`, `acceleration`, `throttle`, `brake`, `tilt`, `gear`) pentru a aduce valorile la o scară comună (medie 0, deviație 1), esențială pentru convergența Rețelei Neuronale MLP.
 * **Encoding:** Target-ul `style_label` este deja numeric (0, 1, 2).
 
 ### 4.3 Structurarea seturilor de date
 
-**Împărțire realizată:**
-* 70% – train (35,000 samples)
-* 15% – validation (7,500 samples)
-* 15% – test (7,500 samples)
+**Împărțire realizată (Random Sample):**
+* 70% – train (~126,000 samples)
+* 15% – validation (~27,000 samples)
+* 15% – test (~27,000 samples)
 
 **Principii respectate:**
-* **Shuffling:** Datele au fost amestecate aleatoriu înainte de salvare pentru a elimina dependența temporală, obligând rețeaua să învețe corelațiile dintre senzori, nu ordinea secvențială.
-* **Stratificare:** S-a asigurat prezența tuturor celor 3 stiluri în toate seturile.
+* **Shuffling:** Datele au fost amestecate complet (`df.sample(frac=1)`) înainte de salvare pentru a elimina dependența temporală, obligând rețeaua să învețe corelațiile instantanee dintre senzori, nu ordinea secvențială.
+* **Stratificare:** S-a asigurat prezența echilibrată a tuturor celor 3 stiluri (câte 60k sample-uri fiecare inițial).
 
 ### 4.4 Salvarea rezultatelor preprocesării
 

@@ -2,277 +2,107 @@
 
 **Disciplina:** Rețele Neuronale  
 **Instituție:** POLITEHNICA București – FIIR  
-**Student:** [Nume Prenume]  
-**Link Repository GitHub**
-**Data:** [Data]  
+**Student:** Boata Andrei-Darius  
+**Link Repository GitHub:** https://github.com/Andreid2511/Proiect_RN.git  
+**Data:** 15.01.2025
+
 ---
 
 ## Scopul Etapei 4
 
-Această etapă corespunde punctului **5. Dezvoltarea arhitecturii aplicației software bazată pe RN** din lista de 9 etape - slide 2 **RN Specificatii proiect.pdf**.
-
-**Trebuie să livrați un SCHELET COMPLET și FUNCȚIONAL al întregului Sistem cu Inteligență Artificială (SIA). In acest stadiu modelul RN este doar definit și compilat (fără antrenare serioasă).**
-
-### IMPORTANT - Ce înseamnă "schelet funcțional":
-
- **CE TREBUIE SĂ FUNCȚIONEZE:**
-- Toate modulele pornesc fără erori
-- Pipeline-ul complet rulează end-to-end (de la date → până la output UI)
-- Modelul RN este definit și compilat (arhitectura există)
-- Web Service/UI primește input și returnează output
-
- **CE NU E NECESAR ÎN ETAPA 4:**
-- Model RN antrenat cu performanță bună
-- Hiperparametri optimizați
-- Acuratețe mare pe test set
-- Web Service/UI cu funcționalități avansate
-
-**Scopul anti-plagiat:** Nu puteți copia un notebook + model pre-antrenat de pe internet, pentru că modelul vostru este NEANTRENAT în această etapă. Demonstrați că înțelegeți arhitectura și că ați construit sistemul de la zero.
+Această etapă corespunde punctului **5. Dezvoltarea arhitecturii aplicației software bazată pe RN**.  
+**Obiectiv:** Livrarea unui schelet complet și funcțional al Sistemului cu Inteligență Artificială (SIA), în care toate modulele comunică între ele, iar modelul RN este definit și integrat (chiar dacă neantrenat la performanță maximă).
 
 ---
 
-##  Livrabile Obligatorii
+## Livrabile Obligatorii
 
 ### 1. Tabelul Nevoie Reală → Soluție SIA → Modul Software
 
 | **Nevoie reală concretă** | **Cum o rezolvă SIA-ul vostru** | **Modul software responsabil** |
 |---------------------------|--------------------------------|--------------------------------|
-| **Reducerea consumului** în traficul urban aglomerat ("Stop & Go") | Detectează stilul "Agresiv" la viteză mică (<60 km/h) și **forțează schimbarea treptelor la 2200 RPM** (Mod Eco) pentru a preveni turarea inutilă. | `app_gui.py` (Smart Gearbox Logic) + `train_model.py` |
-| **Performanță dinamică** la depășiri pe autostradă | Detectează stilul "Agresiv" la viteză mare (>90 km/h) și **permite motorului să urce la 5800 RPM** (Mod Sport) pentru cuplu maxim. | `app_gui.py` (Smart Gearbox Logic) + `train_model.py` |
-| **Evitarea alarmelor false** la urcarea pantelor abrupte | Folosește senzorul de înclinație (Tilt) pentru a valida că accelerația crescută (80%+) este necesară fizic, menținând clasificarea **Normal/Eco**. | `generate_data.py` (Physics Gen) + `train_model.py` |
-**Instrucțiuni:**
-- Fiți concreti (nu vagi): "detectare fisuri sudură" ✓, "îmbunătățire proces" ✗
-- Specificați metrici măsurabile: "< 2 secunde", "> 95% acuratețe", "reducere 20%"
-- Legați fiecare nevoie de modulele software pe care le dezvoltați
+| **Reducerea consumului** în traficul urban aglomerat ("Stop & Go") | Detectează stilul "Eco" sau "Normal" la viteze mici și **forțează schimbarea treptelor la <2200 RPM** pentru a preveni turarea inutilă. | `app/main.py` (Gearbox Logic) + `neural_network/train_model.py` |
+| **Siguranță și putere** la depășiri pe autostradă | Detectează stilul "Sport" (accelerație bruscă) și **permite motorului să urce la 5800 RPM** înainte de schimbare, oferind cuplu maxim. | `app/main.py` (Gearbox Logic) + `neural_network/train_model.py` |
+| **Evitarea alarmelor false** la coborârea pantelor abrupte (Hill Descent) | Folosește senzorul de înclinație (Tilt < -2°) pentru a detecta coborârea și a ignora turația mare cauzată de frâna de motor, clasificând corect situația ca **FORCED_ECO**. | `app/main.py` (Override Logic) + `data_acquisition/generate_data.py` |
 
 ---
 
-### 2. Contribuția Voastră Originală la Setul de Date – MINIM 40% din Totalul Observațiilor Finale
+### 2. Contribuția Originală la Setul de Date – 100% Original
 
-**Regula generală:** Din totalul de **N observații finale** în `data/processed/`, **minimum 40%** trebuie să fie **contribuția voastră originală**.
+Deoarece datele publice nu conțin informații specifice despre înclinația drumului (`tilt`) corelate cu turația și treapta de viteză pentru o cutie automată specifică, am ales să generez **întregul set de date** prin simulare fizică.
 
-#### Cum se calculează 40%:
-
-**Exemplu 1 - Dataset DOAR public în Etapa 3:**
-```
-Etapa 3: Ați folosit 10,000 samples dintr-o sursa externa (ex: Kaggle)
-Etapa 4: Trebuie să generați/achiziționați date astfel încât:
-  
-Opțiune A: Adăugați 6,666 samples noi → Total 16,666 (6,666/16,666 = 40%)
-Opțiune B: Păstrați 6,000 publice + 4,000 generate → Total 10,000 (4,000/10,000 = 40%)
-```
-
-**Exemplu 2 - Dataset parțial original în Etapa 3:**
-```
-Etapa 3: Ați avut deja 3,000 samples generate + 7,000 publice = 10,000 total
-Etapa 4: 3,000 samples existente numără ca "originale"
-        Dacă 3,000/10,000 = 30% < 40% → trebuie să generați încă ~1,700 samples
-        pentru a ajunge la 4,700/10,000 = 47% > 40% ✓
-```
-
-**Exemplu 3 - Dataset complet original:**
-```
-Etapa 3-4: Generați toate datele (simulare, senzori proprii, etichetare manuală - varianta recomandata)
-           → 100% original ✓ (depășește cu mult 40% - FOARTE BINE!)
-```
-
-#### Tipuri de contribuții acceptate (exemple din inginerie):
-
-Alegeți UNA sau MAI MULTE dintre variantele de mai jos și **demonstrați clar în repository**:
-
-| **Tip contribuție** | **Exemple concrete din inginerie** | **Dovada minimă cerută** |
-|---------------------|-------------------------------------|--------------------------|
-| **Date generate prin simulare fizică** | • Traiectorii robot în Gazebo<br>• Vibrații motor cu zgomot aleator calibrat<br>• Consumuri energetice proces industrial simulat | Cod Python/LabVIEW funcțional + grafice comparative (simulat vs real din literatură) + justificare parametri |
-| **Date achiziționate cu senzori proprii** | • 500-2000 măsurători accelerometru pe motor<br>• 100-1000 imagini capturate cu cameră montată pe robot<br>• 200-1000 semnale GPS/IMU de pe platformă mobilă<br>• Temperaturi/presiuni procesate din Arduino/ESP32 | Foto setup experimental + CSV-uri produse + descriere protocol achiziție (frecvență, durata, condiții) |
-| **Etichetare/adnotare manuală** | • Etichetat manual 1000+ imagini defecte sudură<br>• Anotat 500+ secvențe video cu comportamente robot<br>• Clasificat manual 2000+ semnale vibrații (normal/anomalie)<br>• Marcat manual 1500+ puncte de interes în planuri tehnice | Fișier Excel/JSON cu labels + capturi ecran tool etichetare + log timestamp-uri lucru |
-| **Date sintetice prin metode avansate** | • Simulări FEM/CFD pentru date dinamice proces | Cod implementare metodă + exemple before/after + justificare hiperparametri + validare pe subset real |
-
-#### Declarație obligatorie în README:
-
-Scrieți clar în acest README (Secțiunea 2):
-
-```markdown
-### Contribuția originală la setul de date:
-
-**Total observații finale:** [N] (după Etapa 3 + Etapa 4)
-**Observații originale:** [M] ([X]%)
+**Total observații finale:** 180,000  
+**Observații originale:** 180,000 (100%)
 
 **Tipul contribuției:**
 [X] Date generate prin simulare fizică  
 [ ] Date achiziționate cu senzori proprii  
 [ ] Etichetare/adnotare manuală  
-[ ] Date sintetice prin metode avansate  
 
 **Descriere detaliată:**
-[Explicați în 2-3 paragrafe cum ați generat datele, ce metode ați folosit, 
-de ce sunt relevante pentru problema voastră, cu ce parametri ați rulat simularea/achiziția]
-
-**Locația codului:** `src/data_acquisition/[numele_scriptului]`
-**Locația datelor:** `data/generated/` sau `data/raw/original/`
+Am implementat un simulator fizic în Python (`src/data_acquisition/generate_data.py`) care modelează dinamica longitudinală a unui vehicul. Simulatorul ia în calcul forțele de tracțiune (bazate pe curba de cuplu a unui motor aspirat), rezistența la rulare, gravitația (în funcție de pantă) și rezistența aerodinamică.
+Datele sunt generate la o frecvență de 30Hz (dt=0.033s) pentru a imita perfect ciclul de execuție al aplicației finale. Au fost simulate 3 scenarii distincte de condus (Eco, Normal, Sport) prin variația agresivității apăsării pedalelor și a momentelor de schimbare a treptelor.
 
 **Dovezi:**
-- Grafic comparativ: `docs/generated_vs_real.png`
-- Setup experimental: `docs/acquisition_setup.jpg` (dacă aplicabil)
-- Tabel statistici: `docs/data_statistics.csv`
-```
-
-#### Exemple pentru "contribuție originală":
--Simulări fizice realiste cu ecuații și parametri justificați  
--Date reale achiziționate cu senzori proprii (setup documentat)  
--Augmentări avansate cu justificare fizică (ex: simulare perspective camera industrială)  
-
-
-#### Atenție - Ce NU este considerat "contribuție originală":
-
-- Augmentări simple (rotații, flips, crop) pe date publice  
-- Aplicare filtre standard (Gaussian blur, contrast) pe imagini publice  
-- Normalizare/standardizare (aceasta e preprocesare, nu generare)  
-- Subset dintr-un dataset public (ex: selectat 40% din ImageNet)
-
+- Codul sursă: `src/data_acquisition/generate_data.py`
+- Datele generate: `data/train/train.csv` (conține coloanele `rpm`, `speed`, `acceleration`, `throttle`, `brake`, `tilt`, `gear`, `style_label`)
 
 ---
 
-### 3. Diagrama State Machine a Întregului Sistem (OBLIGATORIE)
+### 3. Diagrama State Machine a Întregului Sistem
 
-**Cerințe:**
-- **Minimum 4-6 stări clare** cu tranziții între ele
-- **Formate acceptate:** PNG/SVG, pptx, draw.io 
-- **Locație:** `docs/state_machine.*` (orice extensie)
-- **Legendă obligatorie:** 1-2 paragrafe în acest README: "De ce ați ales acest State Machine pentru nevoia voastră?"
+Diagrama de stări descrie logica decizională a cutiei de viteze automate, care integrează predicția Rețelei Neuronale cu reguli de siguranță fizică.
 
-**Stări tipice pentru un SIA:**
-```
-IDLE → ACQUIRE_DATA → PREPROCESS → INFERENCE → DISPLAY/ACT → LOG → [ERROR] → STOP
-                ↑______________________________________________|
-```
 
-**Exemple concrete per domeniu de inginerie:**
 
-#### A. Monitorizare continuă proces industrial (vibrații motor, temperaturi, presiuni):
-```
-IDLE → START_ACQUISITION → COLLECT_SENSOR_DATA → BUFFER_CHECK → 
-PREPROCESS (filtrare, FFT) → RN_INFERENCE → THRESHOLD_CHECK → 
-  ├─ [Normal] → LOG_RESULT → UPDATE_DASHBOARD → COLLECT_SENSOR_DATA (loop)
-  └─ [Anomalie] → TRIGGER_ALERT → NOTIFY_OPERATOR → LOG_INCIDENT → 
-                  COLLECT_SENSOR_DATA (loop)
-       ↓ [User stop / Emergency]
-     SAFE_SHUTDOWN → STOP
-```
+**Legendă și Justificare:**
 
-#### B. Clasificare imagini defecte producție (suduri, suprafețe, piese):
-```
-IDLE → WAIT_TRIGGER (senzor trecere piesă) → CAPTURE_IMAGE → 
-VALIDATE_IMAGE (blur check, brightness) → 
-  ├─ [Valid] → PREPROCESS (resize, normalize) → RN_INFERENCE → 
-              CLASSIFY_DEFECT → 
-                ├─ [OK] → LOG_OK → CONVEYOR_PASS → IDLE
-                └─ [DEFECT] → LOG_DEFECT → TRIGGER_REJECTION → IDLE
-  └─ [Invalid] → ERROR_IMAGE_QUALITY → RETRY_CAPTURE (max 3×) → IDLE
-       ↓ [Shift end]
-     GENERATE_REPORT → STOP
-```
+Am ales o arhitectură hibridă **RN + Rule-Based** (State Machine) pentru că o cutie de viteze trebuie să fie deterministă în situații critice, dar adaptabilă în rest.
 
-#### C. Predicție traiectorii robot mobil (AGV, AMR în depozit):
-```
-IDLE → LOAD_MAP → RECEIVE_TARGET → PLAN_PATH → 
-VALIDATE_PATH (obstacle check) →
-  ├─ [Clear] → EXECUTE_SEGMENT → ACQUIRE_SENSORS (LIDAR, IMU) → 
-              RN_PREDICT_NEXT_STATE → UPDATE_TRAJECTORY → 
-                ├─ [Target reached] → STOP_AT_TARGET → LOG_MISSION → IDLE
-                └─ [In progress] → EXECUTE_SEGMENT (loop)
-  └─ [Obstacle detected] → REPLAN_PATH → VALIDATE_PATH
-       ↓ [Emergency stop / Battery low]
-     SAFE_STOP → LOG_STATUS → STOP
-```
+**Stările principale:**
+1. **PREPROCESS & INFERENCE:** Sistemul preia datele brute (senzori), le scalează și interoghează Rețeaua Neuronală pentru a afla intenția șoferului (Eco/Normal/Sport).
+2. **HILL_DESC / HILL_CLIMB:** Stări activate prioritar de senzorul de înclinație (`tilt`). Dacă panta este abruptă, fizica dictează comportamentul (ex: frână de motor la vale), ignorând parțial stilul șoferului pentru siguranță.
+3. **KICKDOWN:** O stare critică de "urgență". Dacă pedala este apăsată >90%, se ignoră orice mod Eco și se retrogradează imediat pentru putere maximă.
+4. **ECO / SPORT / NORMAL MODE:** Stările standard de funcționare, unde pragurile de schimbare a vitezelor sunt ajustate dinamic de predicția AI.
 
-#### D. Predicție consum energetic (turbine eoliene, procese batch):
-```
-IDLE → LOAD_HISTORICAL_DATA → ACQUIRE_CURRENT_CONDITIONS 
-(vânt, temperatură, demand) → PREPROCESS_FEATURES → 
-RN_FORECAST (24h ahead) → VALIDATE_FORECAST (sanity checks) →
-  ├─ [Valid] → DISPLAY_FORECAST → UPDATE_CONTROL_STRATEGY → 
-              LOG_PREDICTION → WAIT_INTERVAL (1h) → 
-              ACQUIRE_CURRENT_CONDITIONS (loop)
-  └─ [Invalid] → ERROR_FORECAST → USE_FALLBACK_MODEL → LOG_ERROR → 
-                ACQUIRE_CURRENT_CONDITIONS (loop)
-       ↓ [User request report]
-     GENERATE_DAILY_REPORT → STOP
-```
-
-**Notă pentru proiecte simple:**
-Chiar dacă aplicația voastră este o clasificare simplă (user upload → classify → display), trebuie să modelați fluxul ca un State Machine. Acest exercițiu vă învață să gândiți modular și să anticipați toate stările posibile (inclusiv erori).
-
-**Legendă obligatorie (scrieți în README):**
-```markdown
-### Justificarea State Machine-ului ales:
-
-Am ales arhitectura [descrieți tipul: monitorizare continuă / clasificare la senzor / 
-predicție batch / control în timp real] pentru că proiectul nostru [explicați nevoia concretă 
-din tabelul Secțiunea 1].
-
-Stările principale sunt:
-1. [STARE_1]: [ce se întâmplă aici - ex: "achiziție 1000 samples/sec de la accelerometru"]
-2. [STARE_2]: [ce se întâmplă aici - ex: "calcul FFT și extragere 50 features frecvență"]
-3. [STARE_3]: [ce se întâmplă aici - ex: "inferență RN cu latență < 50ms"]
-...
-
-Tranzițiile critice sunt:
-- [STARE_A] → [STARE_B]: [când se întâmplă - ex: "când buffer-ul atinge 1024 samples"]
-- [STARE_X] → [ERROR]: [condiții - ex: "când senzorul nu răspunde > 100ms"]
-
-Starea ERROR este esențială pentru că [explicați ce erori pot apărea în contextul 
-aplicației voastre industriale - ex: "senzorul se poate deconecta în mediul industrial 
-cu vibrații și temperatură variabilă, trebuie să gestionăm reconnect automat"].
-
-Bucla de feedback [dacă există] funcționează astfel: [ex: "rezultatul inferenței 
-actualizează parametrii controlerului PID pentru reglarea vitezei motorului"].
-```
+**Tranziții critice:**
+- `INFERENCE` → `KICKDOWN`: Are prioritate maximă (siguranță în depășiri).
+- `INFERENCE` → `HILL_DESC`: Previne interpretarea greșită a turației mari la vale ca fiind "Sport".
 
 ---
 
-### 4. Scheletul Complet al celor 3 Module Cerute la Curs (slide 7)
+### 4. Scheletul Complet al celor 3 Module
 
-Toate cele 3 module trebuie să **pornească și să ruleze fără erori** la predare. Nu trebuie să fie perfecte, dar trebuie să demonstreze că înțelegeți arhitectura.
+Toate modulele sunt implementate și funcționale în repository.
 
-| **Modul** | **Python (exemple tehnologii)** | **LabVIEW** | **Cerință minimă funcțională (la predare)** |
-|-----------|----------------------------------|-------------|----------------------------------------------|
-| **1. Data Logging / Acquisition** | `src/data_acquisition/` | LLB cu VI-uri de generare/achiziție | **MUST:** Produce CSV cu datele voastre (inclusiv cele 40% originale). Cod rulează fără erori și generează minimum 100 samples demonstrative. |
-| **2. Neural Network Module** | `src/neural_network/model.py` sau folder dedicat | LLB cu VI-uri RN | **MUST:** Modelul RN definit, compilat, poate fi încărcat. **NOT required:** Model antrenat cu performanță bună (poate avea weights random/inițializați). |
-| **3. Web Service / UI** | Streamlit, Gradio, FastAPI, Flask, Dash | WebVI sau Web Publishing Tool | **MUST:** Primește input de la user și afișează un output. **NOT required:** UI frumos, funcționalități avansate. |
+| **Modul** | **Implementare** | **Status Funcțional** |
+|-----------|------------------|-----------------------|
+| **1. Data Logging / Acquisition** | `src/data_acquisition/generate_data.py` | ✅ Rulează fără erori, generează 180k samples, exportă în `data/train/` |
+| **2. Neural Network Module** | `src/neural_network/train_model.py` | ✅ Definește arhitectura MLP, antrenează pe datele generate și salvează modelul `.h5` |
+| **3. Web Service / UI** | `src/app/main.py` (Tkinter) | ✅ Interfața grafică pornește, afișează ceasurile de bord, preia input de la slidere și afișează predicția modelului în timp real. |
 
 #### Detalii per modul:
 
-#### **Modul 1: Data Logging / Acquisition**
+**Modul 1: Data Acquisition**
+- Script Python care simulează fizica vehiculului.
+- Rulează automat la execuție și populează folderele `data/` cu fișiere CSV gata de antrenare.
 
-**Funcționalități obligatorii:**
-- [ ] Cod rulează fără erori: `python src/data_acquisition/generate.py` sau echivalent LabVIEW
-- [ ] Generează CSV în format compatibil cu preprocesarea din Etapa 3
-- [ ] Include minimum 40% date originale în dataset-ul final
-- [ ] Documentație în cod: ce date generează, cu ce parametri
+**Modul 2: Neural Network**
+- Folosește TensorFlow/Keras.
+- Arhitectura: MLP (Multi-Layer Perceptron) cu 3 straturi Dense și activare ReLU/Softmax.
+- Scriptul încarcă datele, le normalizează cu `StandardScaler` și antrenează modelul.
+- Output: `models/untrained_model.h5` (sau trained, în funcție de stadiu) și `config/preprocessing_params.pkl`.
 
-#### **Modul 2: Neural Network Module**
+**Modul 3: User Interface (App)**
+- Aplicație Desktop construită cu `tkinter`.
+- Simulează un bord digital de mașină (Cockpit).
+- **Input:** Slidere pentru Accelerație, Frână, Pantă.
+- **Procesare:** Rulează bucla fizică la 30 FPS + Inferență AI.
+- **Output:** Turometru, Vitezometru, Treapta de viteză curentă și Modul detectat (Eco/Sport).
 
-**Funcționalități obligatorii:**
-- [ ] Arhitectură RN definită și compilată fără erori
-- [ ] Model poate fi salvat și reîncărcat
-- [ ] Include justificare pentru arhitectura aleasă (în docstring sau README)
-- [ ] **NU trebuie antrenat** cu performanță bună (weights pot fi random)
+---
 
-
-#### **Modul 3: Web Service / UI**
-
-**Funcționalități MINIME obligatorii:**
-- [ ] Propunere Interfață ce primește input de la user (formular, file upload, sau API endpoint)
-- [ ] Includeți un screenshot demonstrativ în `docs/screenshots/`
-
-**Ce NU e necesar în Etapa 4:**
-- UI frumos/profesionist cu grafică avansată
-- Funcționalități multiple (istorice, comparații, statistici)
-- Predicții corecte (modelul e neantrenat, e normal să fie incorect)
-- Deployment în cloud sau server de producție
-
-**Scop:** Prima demonstrație că pipeline-ul end-to-end funcționează: input user → preprocess → model → output.
-
+## Structura Repository-ului la Finalul Etapei 4
 
 ## Structura Repository-ului la Finalul Etapei 4 (OBLIGATORIE)
 
@@ -280,65 +110,46 @@ Toate cele 3 module trebuie să **pornească și să ruleze fără erori** la pr
 
 ```
 proiect-rn-[nume-prenume]/
-├── data/
-│   ├── raw/
-│   ├── processed/
-│   ├── generated/  # Date originale
+├── config/ 
+│   └── preprocessing_params.pkl
+├── data/   # CSV-uri generate
 │   ├── train/
-│   ├── validation/
+│   ├── validation/ 
 │   └── test/
 ├── src/
 │   ├── data_acquisition/
-│   ├── preprocessing/  # Din Etapa 3
+│       └── generate_data.py # Generatorul de date  (Modulul 1)
 │   ├── neural_network/
 │   └── app/  # UI schelet
 ├── docs/
-│   ├── state_machine.*           #(state_machine.png sau state_machine.pptx sau state_machine.drawio)
-│   └── [alte dovezi]
-├── models/  # Untrained model
+│   ├── screenshots/ 
+│   │   └── ui_demo.png              # Screenshot aplicație rulând  
+│   └──  state_machine.png           #(state_machine.png sau state_machine.pptx sau state_machine.drawio)
+├── models
+|   └──untrained_model.h5            # Modelul compilat
 ├── config/
 ├── README.md
-├── README_Etapa3.md              # (deja existent)
-├── README_Etapa4_Arhitectura_SIA.md              # ← acest fișier completat (în rădăcină)
+├── README_Etapa3.md                 # (deja existent)
+├── README_Etapa4_Arhitectura_SIA.md # ← acest fișier completat (în rădăcină)
 └── requirements.txt  # Sau .lvproj
 ```
-
-**Diferențe față de Etapa 3:**
-- Adăugat `data/generated/` pentru contribuția dvs originală
-- Adăugat `src/data_acquisition/` - MODUL 1
-- Adăugat `src/neural_network/` - MODUL 2
-- Adăugat `src/app/` - MODUL 3
-- Adăugat `models/` pentru model neantrenat
-- Adăugat `docs/state_machine.png` - OBLIGATORIU
-- Adăugat `docs/screenshots/` pentru demonstrație UI
-
 ---
 
-## Checklist Final – Bifați Totul Înainte de Predare
+## Checklist Final – Predare Etapa 4
 
 ### Documentație și Structură
 - [x] Tabelul Nevoie → Soluție → Modul completat.
 - [x] Declarație contribuție 100% date originale (Simulare Fizică).
-- [x] Cod generare/achiziție date funcțional și documentat.
-- [x] Diagrama State Machine creată în `docs/State_machine.png`.
-- [x] Legendă State Machine scrisă.
+- [x] Diagrama State Machine explicată.
 
 ### Modul 1: Data Logging / Acquisition
-- [x] Cod rulează fără erori (`python src/data_acquisition/generate_data.py`).
-- [x] Produce CSV-uri compatibile.
+- [x] Cod `generate_data.py` rulează și produce date valide.
 
 ### Modul 2: Neural Network
-- [x] Arhitectură RN definită și antrenată (`python src/neural_network/train_model.py`).
-- [x] Model salvat cu succes.
+- [x] Modelul este definit, compilat și salvat (`models/*.h5`).
 
 ### Modul 3: Web Service / UI
-- [x] Interfața pornește (`python src/app_gui.py`).
-- [x] Screenshot demonstrativ în `docs/screenshots/ui_demo.png`.
+- [x] Aplicația `main.py` pornește și reacționează la input-ul utilizatorului.
+- [x] Screenshot `ui_demo.png` existent în docs.
 
 ---
-
-**Predarea se face prin commit pe GitHub cu mesajul:** `"Etapa 4 completă - Arhitectură SIA funcțională"`
-**Tag obligatoriu:**  
-`git tag -a v0.4-architecture -m "Etapa 4 - Skeleton complet SIA"`
-
-

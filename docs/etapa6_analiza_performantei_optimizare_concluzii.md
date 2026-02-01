@@ -2,9 +2,9 @@
 
 **Disciplina:** Rețele Neuronale  
 **Instituție:** POLITEHNICA București – FIIR  
-**Student:** [Nume Prenume]  
-**Link Repository GitHub:** [URL complet]  
-**Data predării:** [Data]
+**Student:** Boata Andrei-Darius  
+**Link Repository GitHub:** [https://github.com/Andreid2511/Proiect_RN.git]  
+**Data predării:** 31.01.2025
 
 ---
 ## Scopul Etapei 6
@@ -42,110 +42,48 @@ Această etapă corespunde punctelor **7. Analiza performanței și optimizarea 
 
 ---
 
-## Cerințe
-
-Completați **TOATE** punctele următoare:
-
-1. **Minimum 4 experimente de optimizare** (variație sistematică a hiperparametrilor)
-2. **Tabel comparativ experimente** cu metrici și observații (vezi secțiunea dedicată)
-3. **Confusion Matrix** generată și analizată
-4. **Analiza detaliată a 5 exemple greșite** cu explicații cauzale
-5. **Metrici finali pe test set:**
-   - **Acuratețe ≥ 70%** (îmbunătățire față de Etapa 5)
-   - **F1-score (macro) ≥ 0.65**
-6. **Salvare model optimizat** în `models/optimized_model.h5` (sau `.pt`, `.lvmodel`)
-7. **Actualizare aplicație software:**
-   - Tabel cu modificările aduse aplicației în Etapa 6
-   - UI încarcă modelul OPTIMIZAT (nu cel din Etapa 5)
-   - Screenshot demonstrativ în `docs/screenshots/inference_optimized.png`
-8. **Concluzii tehnice** (minimum 1 pagină): performanță, limitări, lecții învățate
-
-## 2. Optimizarea Hiperparametrilor (Experimente)
-
-Pentru a justifica alegerea arhitecturii finale, am rulat un script de optimizare (`src/neural_network/optimize.py`) care a antrenat și comparat 4 arhitecturi distincte pe un subset de date, pentru a observa viteza de convergență și latența.
-
-### Tabel Rezultate Experimentale (Generat în `results/optimization_experiments.csv`)
-
-| Experiment ID | Arhitectură | Accuracy (5 epochs) | F1 Score | Inference (ms) | Observații |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **EXP-01** | Small (Rapid) | 0.8627 | 0.8612 | 0.0346 ms | **Sub-fit.** Modelul este prea simplu, pierzând ~12% precizie față de baseline. |
-| **EXP-02** | **Baseline (Tanh)** | **0.8976*** | **0.8954** | **0.0364 ms** | **ALES FINAL.** Convergență stabilă. Antrenat complet atinge **98.29%**. |
-| **EXP-03** | Baseline (ReLU) | 0.9307 | 0.9302 | 0.0354 ms | Convergență rapidă inițial, dar instabil pe date continue (risc de "bruscări"). |
-| **EXP-04** | Large (Dropout) | 0.9362 | 0.9357 | 0.0356 ms | Complexitate inutilă. Câștig de precizie minor față de EXP-03. |
-
-**Justificare alegere configurație finală:**
-```
-Am ales Exp 5 ca model final pentru că:
-1. Oferă cel mai bun F1-score (0.75), critic pentru aplicația noastră de [descrieți]
-2. Îmbunătățirea vine din augmentări relevante domeniului industrial (zgomot gaussian 
-   calibrat la nivelul real de zgomot din mediul de producție: SNR ≈ 20dB)
-3. Timpul de antrenare suplimentar (25 min) este acceptabil pentru beneficiul obținut
-4. Testare pe date noi arată generalizare bună (nu overfitting pe augmentări)
-```
-
-**Resurse învățare rapidă - Optimizare:**
-- Hyperparameter Tuning: https://keras.io/guides/keras_tuner/ 
-- Grid Search: https://scikit-learn.org/stable/modules/grid_search.html
-- Regularization (Dropout, L2): https://keras.io/api/layers/regularization_layers/
-
----
-
 ## 1. Actualizarea Aplicației Software în Etapa 6 
 
-**CERINȚĂ CENTRALĂ:** Documentați TOATE modificările aduse aplicației software ca urmare a optimizării modelului.
+**CERINȚĂ CENTRALĂ:** Modificările aduse aplicației software ca urmare a optimizării modelului și a analizei erorilor.
 
 ### Tabel Modificări Aplicație Software
 
 | **Componenta** | **Stare Etapa 5** | **Modificare Etapa 6** | **Justificare** |
 |----------------|-------------------|------------------------|-----------------|
-| **Model încărcat** | `trained_model.h5` | `optimized_model.h5` | +9% accuracy, -5% FN |
-| **Threshold alertă (State Machine)** | 0.5 (default) | 0.35 (clasa 'defect') | Minimizare FN în context industrial |
-| **Stare nouă State Machine** | N/A | `CONFIDENCE_CHECK` | Filtrare predicții cu confidence <0.6 |
-| **Latență target** | 100ms | 50ms (ONNX export) | Cerință timp real producție |
-| **UI - afișare confidence** | Da/Nu simplu | Bară progres + valoare % | Feedback operator îmbunătățit |
-| **Logging** | Doar predicție | Predicție + confidence + timestamp | Audit trail complet |
-| **Web Service response** | JSON minimal | JSON extins + metadata | Integrare API extern |
+| **Model încărcat** | `trained_model.h5` (Baseline Tanh) | `optimized_model.h5` (ReLU) | Eficiență computațională superioară și robustețe. |
+| **Logic Override** | Niciunul | **Hill Descent Override** | Corecție pentru confuzia AI la coborârea pantelor (RPM mare, pedala 0). |
+| **Arhitectură Fizică** | Parametri standard | Parametri calibrați | Putere (0.14) și Gravitație (0.018) ajustate pentru realism. |
+| **Management Erori** | Implicit | `try-except` pe inferență | Prevenirea crash-ului aplicației dacă modelul nu încarcă datele. |
+| **Statistici** | N/A | Cumulative pe sesiune | Feedback vizual pentru stilul dominant de condus. |
 
-**Completați pentru proiectul vostru:**
-```markdown
 ### Modificări concrete aduse în Etapa 6:
 
 1. **Model înlocuit:** `models/trained_model.h5` → `models/optimized_model.h5`
-   - Îmbunătățire: Accuracy +X%, F1 +Y%
-   - Motivație: [descrieți de ce modelul optimizat e mai bun pentru aplicația voastră]
+   - Am trecut de la activare **Tanh** la **ReLU**.
+   - Deși acuratețea este similară, ReLU este mai eficient pentru inferența în timp real (calcule liniare vs exponențiale).
 
-2. **State Machine actualizat:**
-   - Threshold modificat: [valoare veche] → [valoare nouă]
-   - Stare nouă adăugată: [nume stare] - [ce face]
-   - Tranziție modificată: [descrieți]
+2. **Implementare "Rule-Based Override" în `main.py`:**
+   - **Problemă identificată:** La coborârea pantelor abrupte (Hill Descent), motorul are RPM mare (frână de motor), iar AI-ul clasifica greșit acest comportament ca "Sport" sau "Normal", deși consumul este 0.
+   - **Soluție:** Am adăugat o regulă logică care suprascrie predicția AI:
+     ```python
+     if self.tilt < -2 and self.throttle < 5:
+         prediction = 0 # FORCED ECO
+     ```
 
 3. **UI îmbunătățit:**
-   - [descrieți modificările vizuale/funcționale]
-   - Screenshot: `docs/screenshots/ui_optimized.png`
+   - Adăugarea statisticilor de sesiune ("Dominant Style").
+   - Integrarea logicii de cutie de viteze direct în bucla de fizică pentru o latență minimă.
+   - Adăugarea unei căsuțe cu indicații/explicații
+4. **Logica noua adaugata:**
+   - Kickdown
+      ```python
+     kickdown_enabled = False # Variabila kickdown
 
-4. **Pipeline end-to-end re-testat:**
-   - Test complet: input → preprocess → inference → decision → output
-   - Timp total: [X] ms (vs [Y] ms în Etapa 5)
-```
-
-### Diagrama State Machine Actualizată (dacă s-au făcut modificări)
-
-Dacă ați modificat State Machine-ul în Etapa 6, includeți diagrama actualizată în `docs/state_machine_v2.png` și explicați diferențele:
-
-```
-Exemplu modificări State Machine pentru Etapa 6:
-
-ÎNAINTE (Etapa 5):
-PREPROCESS → RN_INFERENCE → THRESHOLD_CHECK (0.5) → ALERT/NORMAL
-
-DUPĂ (Etapa 6):
-PREPROCESS → RN_INFERENCE → CONFIDENCE_FILTER (>0.6) → 
-  ├─ [High confidence] → THRESHOLD_CHECK (0.35) → ALERT/NORMAL
-  └─ [Low confidence] → REQUEST_HUMAN_REVIEW → LOG_UNCERTAIN
-
-Motivație: Predicțiile cu confidence <0.6 sunt trimise pentru review uman,
-           reducând riscul de decizii automate greșite în mediul industrial.
-```
+     if self.throttle > 90: # Activare kickdown
+            kickdown_enabled = True
+        else:
+            kickdown_enabled = False
+     ```
 
 ---
 
@@ -157,62 +95,41 @@ Motivație: Predicțiile cu confidence <0.6 sunt trimise pentru review uman,
 
 **Analiză obligatorie (completați):**
 
-```markdown
 ### Interpretare Confusion Matrix:
 
-**Clasa cu cea mai bună performanță:** [Nume clasă]
-- Precision: [X]%
-- Recall: [Y]%
-- Explicație: [De ce această clasă e recunoscută bine - ex: features distincte, multe exemple]
+**Clasa cu cea mai bună performanță:** **Sport**
+- **Precision:** 99.48%
+- **Recall:** 99.10%
+- **Explicație:** Clasa Sport este caracterizată de valori extreme (RPM mare, accelerație bruscă), ceea ce o face foarte distinctă în spațiul vectorial al datelor față de celelalte clase.
 
-**Clasa cu cea mai slabă performanță:** [Nume clasă]
-- Precision: [X]%
-- Recall: [Y]%
-- Explicație: [De ce această clasă e problematică - ex: confuzie cu altă clasă, puține exemple]
+**Clasa cu cea mai slabă performanță:** **Normal**
+- **Precision:** 97.27%
+- **Recall:** 97.54%
+- **Explicație:** Clasa "Normal" reprezintă zona de mijloc. Se suprapune parțial cu "Eco" (la viteze de croazieră) și cu "Sport" (în rampe ușoare), generând cele mai multe confuzii marginale.
 
 **Confuzii principale:**
-1. Clasa [A] confundată cu clasa [B] în [X]% din cazuri
-   - Cauză: [descrieți - ex: features similare, overlap în spațiul de caracteristici]
-   - Impact industrial: [descrieți consecințele]
+1. **Clasa [Eco] confundată cu clasa [Normal]**
+   - **Cauză:** Suprapunere de features la viteze constante și accelerații mici. Diferența dintre un condus Eco agresiv și unul Normal relaxat este subtilă.
+   - **Impact industrial:** Redus. Transmisia ar putea menține o treaptă superioară puțin mai mult timp, fără impact asupra siguranței.
    
-2. Clasa [C] confundată cu clasa [D] în [Y]% din cazuri
-   - Cauză: [descrieți]
-   - Impact industrial: [descrieți]
-```
+2. **Clasa [Normal] confundată cu clasa [Sport]**
+   - **Cauză:** În situații de sarcină (pante, greutate), motorul se turează pentru a menține viteza, ceea ce modelul interpretează uneori ca stil agresiv (Sport).
+   - **Impact industrial:** Creșterea ușoară a consumului de combustibil prin menținerea turației ridicate nejustificat.
 
 ### 2.2 Analiza Detaliată a 5 Exemple Greșite
 
-Selectați și analizați **minimum 5 exemple greșite** de pe test set:
+Am analizat cazurile unde modelul a greșit pentru a înțelege limitele sistemului (error_analysis.json).
 
-| **Index** | **True Label** | **Predicted** | **Confidence** | **Cauză probabilă** | **Soluție propusă** |
-|-----------|----------------|---------------|----------------|---------------------|---------------------|
-| #127 | defect_mare | defect_mic | 0.52 | Imagine subexpusă | Augmentare brightness |
-| #342 | normal | defect_mic | 0.48 | Zgomot senzor ridicat | Filtru median pre-inference |
-| #567 | defect_mic | normal | 0.61 | Defect la margine imagine | Augmentare crop variabil |
-| #891 | defect_mare | defect_mic | 0.55 | Overlap features între clase | Mai multe date clasa 'defect_mare' |
-| #1023 | normal | defect_mare | 0.71 | Reflexie metalică interpretată ca defect | Augmentare reflexii |
+| **Index** | **True Label** | **Predicted** | **Confidence** | **Input Features (Rezumat)** | **Cauză probabilă & Soluție** |
+|-----------|----------------|---------------|----------------|------------------------------|-------------------------------|
+| #10437 | **Normal** | **Sport** | 100% | RPM: 3798, Throttle: 84%, Speed: 58 | **Cauză:** Turație și pedală mari. Modelul asociază agresivitatea cu Sport. Eticheta "Normal" este discutabilă aici. |
+| #12187 | **Sport** | **Normal** | 99.9% | RPM: 4134, Throttle: 85%, Speed: 52 | **Cauză:** Deși parametrii sunt de Sport, accelerația era mică (0.04). Modelul a crezut că e un regim de croazieră turată. |
+| #704 | **Eco** | **Normal** | 99.8% | RPM: 2016, **Tilt: -14.5**, Throttle: 4.5% | **Cauză:** Coborâre abruptă (Hill Descent). Modelul a văzut RPM 2000 (frână motor) și a crezut că e Normal. **Soluție:** Am implementat Override-ul logic în `main.py`. |
+| #3859 | **Normal** | **Eco** | 99.7% | Speed: 15, Throttle: 3% | **Cauză:** Viteza și pedala foarte mici (rulare la pas). E greu de distins Normal de Eco aici fără un context temporal mai larg. |
+| #12022 | **Sport** | **Normal** | 99.7% | RPM: 3876, Tilt: 11.5 (Urcare) | **Cauză:** Urcare în rampă. Motorul e turat din cauza sarcinii, nu a stilului sportiv. Modelul a confundat sarcina cu stilul normal. |
 
-**Analiză detaliată per exemplu (scrieți pentru fiecare):**
-```markdown
-### Exemplu #127 - Defect mare clasificat ca defect mic
-
-**Context:** Imagine radiografică sudură, defect vizibil în centru
-**Input characteristics:** brightness=0.3 (subexpus), contrast=0.7
-**Output RN:** [defect_mic: 0.52, defect_mare: 0.38, normal: 0.10]
-
-**Analiză:**
-Imaginea originală are brightness scăzut (0.3 vs. media dataset 0.6), ceea ce 
-face ca textura defectului să fie mai puțin distinctă. Modelul a "văzut" un 
-defect, dar l-a clasificat în categoria mai puțin severă.
-
-**Implicație industrială:**
-Acest tip de eroare (downgrade severitate) poate duce la subestimarea riscului.
-În producție, sudura ar fi acceptată când ar trebui re-inspectată.
-
-**Soluție:**
-1. Augmentare cu variații brightness în intervalul [0.2, 0.8]
-2. Normalizare histogram înainte de inference (în PREPROCESS state)
-```
+**Concluzie Analiză Erori:**
+Majoritatea erorilor provin din situații ambigue (pante abrupte sau zone de graniță între stiluri). Implementarea regulilor hard-codate (Override) pentru pante a rezolvat erorile critice de tipul #704.
 
 ---
 
@@ -220,24 +137,18 @@ Acest tip de eroare (downgrade severitate) poate duce la subestimarea riscului.
 
 ### 3.1 Strategia de Optimizare
 
-Descrieți strategia folosită pentru optimizare:
+Pentru a justifica alegerea arhitecturii finale, am rulat un script de optimizare care a comparat 5 arhitecturi distincte.
 
-```markdown
-### Strategie de optimizare adoptată:
+### Tabel Rezultate Experimentale (Generat în `results/optimization_experiments.csv`)
 
-**Abordare:** [Manual / Grid Search / Random Search / Bayesian Optimization]
+| Experiment ID | Arhitectură | Accuracy | F1 Score | Latency (ms) | Time (s) | Observații |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **EXP-01** | Small (Rapid) | 0.8786 | 0.8787 | 0.0356 | **5.14** | **Sub-fit.** Modelul este prea simplu, pierzând ~7% precizie față de baseline. |
+| **EXP-02** | Baseline (Tanh) | 0.9270 | 0.9271 | 0.0358 | 5.78 | Performanță decentă, dar funcția Tanh limitează convergența rapidă. |
+| **EXP-03** | **Baseline (ReLU)** | **0.9353** | **0.9350** | **0.0346** | 5.53 | **ALES FINAL.** Balanța perfectă între precizie și eficiență computațională. |
+| **EXP-04** | Pyramid (Deep) | 0.9459 | 0.9457 | 0.0385 | 5.50 | Cea mai mare acuratețe brută, dar latența este ușor mai mare și riscă overfitting. |
+| **EXP-05** | Large (Dropout) | 0.9377 | 0.9376 | 0.0343 | 5.92 | Performanță similară, dar complexitate inutilă. |
 
-**Axe de optimizare explorate:**
-1. **Arhitectură:** [variații straturi, neuroni]
-2. **Regularizare:** [Dropout, L2, BatchNorm]
-3. **Learning rate:** [scheduler, valori testate]
-4. **Augmentări:** [tipuri relevante domeniului]
-5. **Batch size:** [valori testate]
-
-**Criteriu de selecție model final:** [ex: F1-score maxim cu constraint pe latență <50ms]
-
-**Buget computațional:** [ore GPU, număr experimente]
-```
 
 ### 3.2 Grafice Comparative
 
@@ -248,32 +159,17 @@ Generați și salvați în `docs/optimization/`:
 
 ### 3.3 Raport Final Optimizare
 
-```markdown
-### Raport Final Optimizare
+**Configurație finală aleasă (Optimized ReLU - bazată pe EXP-03):**
+- **Arhitectură:** `Input(7) -> Dense(32, ReLU) -> Dense(32, ReLU) -> Dense(16, ReLU) -> Output(3, Softmax)`
 
-**Model baseline (Etapa 5):**
-- Accuracy: 0.72
-- F1-score: 0.68
-- Latență: 48ms
+**Analiză Comparativă (Baseline Tanh vs. Optimized ReLU):**
+În urma experimentelor, am observat că ambele modele converg către o acuratețe ridicată (~98% la antrenare completă), însă am selectat **ReLU** pentru etapa de producție din considerente de **eficiență**:
 
-**Model optimizat (Etapa 6):**
-- Accuracy: 0.81 (+9%)
-- F1-score: 0.77 (+9%)
-- Latență: 35ms (-27%)
+1. **Performanță:** Modelul ReLU a atins **98.28% Accuracy** și **0.98 F1-Score**, menținând standardul ridicat impus de Baseline.
+2. **Viteză de Învățare:** Graficele de învățare (`learning_curves_final.png`) demonstrează că ReLU reduce eroarea (Loss) mai agresiv în primele 20 de epoci comparativ cu Tanh.
+3. **Eficiență Hardware:** Deoarece aplicația trebuie să ruleze în timp real, funcția ReLU (fiind liniară pe porțiuni) este mai puțin costisitoare pentru procesor decât funcția Tanh (exponențială), reducând încărcarea CPU fără a sacrifica precizia.
 
-**Configurație finală aleasă:**
-- Arhitectură: [descrieți]
-- Learning rate: [valoare] cu [scheduler]
-- Batch size: [valoare]
-- Regularizare: [Dropout/L2/altele]
-- Augmentări: [lista]
-- Epoci: [număr] (early stopping la epoca [X])
-
-**Îmbunătățiri cheie:**
-1. [Prima îmbunătățire - ex: adăugare strat hidden → +5% accuracy]
-2. [A doua îmbunătățire - ex: augmentări domeniu → +3% F1]
-3. [A treia îmbunătățire - ex: threshold personalizat → -60% FN]
-```
+**Concluzie:** Optimizarea nu a vizat doar creșterea procentelor (deja foarte mari), ci **robustizarea** modelului și reducerea complexității matematice pentru inferență.
 
 ---
 
@@ -281,24 +177,33 @@ Generați și salvați în `docs/optimization/`:
 
 ### 4.1 Tabel Sumar Rezultate Finale
 
-| **Metrică** | **Etapa 4** | **Etapa 5** | **Etapa 6** | **Target Industrial** | **Status** |
-|-------------|-------------|-------------|-------------|----------------------|------------|
-| Accuracy | ~20% | 72% | 81% | ≥85% | Aproape |
-| F1-score (macro) | ~0.15 | 0.68 | 0.77 | ≥0.80 | Aproape |
-| Precision (defect) | N/A | 0.75 | 0.83 | ≥0.85 | Aproape |
-| Recall (defect) | N/A | 0.70 | 0.88 | ≥0.90 | Aproape |
-| False Negative Rate | N/A | 12% | 5% | ≤3% | Aproape |
-| Latență inferență | 50ms | 48ms | 35ms | ≤50ms | OK |
-| Throughput | N/A | 20 inf/s | 28 inf/s | ≥25 inf/s | OK |
+Datele de mai jos compară evoluția sistemului de la stadiul de model neantrenat (Etapa 4) la baseline (Etapa 5) și varianta finală optimizată (Etapa 6).
+
+| **Metrică** | **Etapa 4** (Untrained) | **Etapa 5** (Baseline) | **Etapa 6** (Optimizat) | **Target Industrial** | **Status** |
+|:---|:---:|:---:|:---:|:---:|:---:|
+| **Accuracy** | 17.77% | 98.13% | **98.28%** | ≥ 95% | ✅Depășit |
+| **F1-score (macro)** | 0.1718 | 0.9812 | **0.9827** | ≥ 0.95 | ✅Depășit |
+| **Precision (macro)** | 0.4190 | 0.9812 | **0.9827** | ≥ 0.95 | ✅Depășit |
+| **Recall (macro)** | 0.3602 | 0.9812 | **0.9827** | ≥ 0.95 | ✅Depășit |
+| **False Negative Rate** | 63.98% | 1.88% | **1.73%** | ≤ 2.0% | ✅Depășit |
+| **Latență inferență** | 0.0292 ms | 0.0275 ms | **0.0287 ms** | ≤ 1.0 ms | ✅Depășit |
+| **Throughput** | ~34k inf/s | ~36k inf/s | **~34.8k inf/s** | ≥ 1000 inf/s | ✅Depășit |
+
+**Throughput calculat teoretic pe baza latenței (1000 / latency_ms).**
+
+**Observații privind evoluția:**
+1. **Salt major de performanță:** Trecerea de la modelul neantrenat (17.77%) la cel antrenat a adus un câștig masiv, confirmând că datele conțin tipare clare pe care rețeaua le poate învăța.
+2. **Rafinare în Etapa 6:** Deși Baseline-ul (Etapa 5) era deja performant, optimizarea din Etapa 6 (activare ReLU + ajustări fine) a reușit să reducă rata de **False Negatives** de la 1.88% la **1.73%**, ceea ce înseamnă o siguranță sporită în decizii.
+3. **Latență neglijabilă:** Latența de ~0.029ms este de sute de ori mai mică decât bugetul de timp pentru 30 FPS (33ms), permițând rularea modelului pe procesoare slabe fără a afecta fluiditatea aplicației.
 
 ### 4.2 Vizualizări Obligatorii
 
 Salvați în `docs/results/`:
 
-- [ ] `confusion_matrix_optimized.png` - Confusion matrix model final
-- [ ] `learning_curves_final.png` - Loss și accuracy vs. epochs
-- [ ] `metrics_evolution.png` - Evoluție metrici Etapa 4 → 5 → 6
-- [ ] `example_predictions.png` - Grid cu 9+ exemple (correct + greșite)
+- [x] `confusion_matrix_optimized.png` - Confusion matrix model final
+- [x] `learning_curves_final.png` - Loss și accuracy vs. epochs
+- [x] `metrics_evolution.png` - Evoluție metrici Etapa 4 → 5 → 6
+- [x] `example_predictions.png` - Grid cu 9+ exemple (correct + greșite)
 
 ---
 
@@ -308,123 +213,53 @@ Salvați în `docs/results/`:
 
 ### 5.1 Evaluarea Performanței Finale
 
-```markdown
 ### Evaluare sintetică a proiectului
 
 **Obiective atinse:**
 - [x] Model RN funcțional cu accuracy [98]% pe test set
 - [x] Integrare completă în aplicație software (3 module)
-- [ ] State Machine implementat și actualizat
+- [x] State Machine implementat și actualizat
 - [x] Pipeline end-to-end testat și documentat
-- [ ] UI demonstrativ cu inferență reală
-- [ ] Documentație completă pe toate etapele
+- [x] UI demonstrativ cu inferență reală
+- [x] Documentație completă pe toate etapele
 
-**Obiective parțial atinse:**
-- [ ] [Descrieți ce nu a funcționat perfect - ex: accuracy sub target pentru clasa X]
+Proiectul a atins obiectivele propuse. Sistemul SIA este capabil să clasifice stilul de condus cu o precizie de peste 98% și să adapteze transmisia automată în timp real (30 FPS).
 
-**Obiective neatinse:**
-- [ ] [Descrieți ce nu s-a realizat - ex: deployment în cloud, optimizare NPU]
-```
+**Puncte Forte:**
+1. **Latență extrem de mică (0.029ms):** Modelul optimizat ReLU este extrem de rapid, permițând rularea pe hardware modest.
+2. **Sistem Hibrid:** Combinarea Rețelei Neuronale cu reguli logice (Rule-Based Override pentru pante) a eliminat erorile de "bun simț" pe care AI-ul pur le făcea.
+3. **Interfață Robustă:** UI-ul reflectă clar deciziile sistemului.
+
 
 ### 5.2 Limitări Identificate
 
-```markdown
 ### Limitări tehnice ale sistemului
 
-1. **Limitări date:**
-   - [ex: Dataset dezechilibrat - clasa 'defect_mare' are doar 8% din total]
-   - [ex: Date colectate doar în condiții de iluminare ideală]
+1. **Dependența de Date:** Modelul este antrenat pe date sintetice/simulate. Comportamentul în lumea reală ar putea varia din cauza zgomotului senzorilor (vibrații).
+2. **Confuzii la Limită:** Tranzițiile foarte fine între "Eco" și "Normal" sunt uneori etichetate subiectiv, ceea ce se reflectă în o parte dintre cele 1.7% erori.
 
-2. **Limitări model:**
-   - [ex: Performanță scăzută pe imagini cu reflexii metalice]
-   - [ex: Generalizare slabă pe tipuri de defecte nevăzute în training]
-
-3. **Limitări infrastructură:**
-   - [ex: Latență de 35ms insuficientă pentru linie producție 60 piese/min]
-   - [ex: Model prea mare pentru deployment pe edge device]
-
-4. **Limitări validare:**
-   - [ex: Test set nu acoperă toate condițiile din producție reală]
-```
 
 ### 5.3 Direcții de Cercetare și Dezvoltare
 
-```markdown
-### Direcții viitoare de dezvoltare
+**Direcții viitoare de dezvoltare:**
 
 **Pe termen scurt (1-3 luni):**
-1. Colectare [X] date adiționale pentru clasa minoritară
-2. Implementare [tehnica Y] pentru îmbunătățire recall
-3. Optimizare latență prin [metoda Z]
-...
+1. **Colectare date reale:** Instalarea unui logger OBD-II pe un vehicul real pentru a colecta date de telemetrie și validarea modelului în condiții de trafic real.
+2. **Rafinare State Machine:** Implementarea unei logici de "histerezis" mai avansate pentru a preveni schimbările prea frecvente de viteze (gear hunting) în zonele de graniță.
+3. **Optimizare ONNX:** Exportarea modelului în format ONNX pentru a permite integrarea pe microcontrollere auto (ex: Infineon Aurix).
 
 **Pe termen mediu (3-6 luni):**
-1. Integrare cu sistem SCADA din producție
-2. Deployment pe [platform edge - ex: Jetson, NPU]
-3. Implementare monitoring MLOps (drift detection)
-...
-
-```
+1. **Integrare cu navigația:** Utilizarea datelor GPS (pante viitoare, curbe) ca input suplimentar pentru a anticipa schimbarea vitezelor (Predictive Powertrain Control).
+2. **Personalizare:** Implementarea unui mod de "învățare continuă" care să adapteze modelul la stilul specific al unui șofer individual.
 
 ### 5.4 Lecții Învățate
 
-```markdown
-### Lecții învățate pe parcursul proiectului
-
-**Tehnice:**
-1. [ex: Preprocesarea datelor a avut impact mai mare decât arhitectura modelului]
-2. [ex: Augmentările specifice domeniului > augmentări generice]
-3. [ex: Early stopping esențial pentru evitare overfitting]
-
-**Proces:**
-1. [ex: Iterațiile frecvente pe date au adus mai multe îmbunătățiri decât pe model]
-2. [ex: Testarea end-to-end timpurie a identificat probleme de integrare]
-3. [ex: Documentația incrementală a economisit timp la final]
-
-**Colaborare:**
-1. [ex: Feedback de la experți domeniu a ghidat selecția features]
-2. [ex: Code review a identificat bug-uri în pipeline preprocesare]
-```
-
-### 5.5 Plan Post-Feedback (ULTIMA ITERAȚIE ÎNAINTE DE EXAMEN)
-
-```markdown
-### Plan de acțiune după primirea feedback-ului
-
-**ATENȚIE:** Etapa 6 este ULTIMA VERSIUNE pentru care se oferă feedback!
-Implementați toate corecțiile înainte de examen.
-
-După primirea feedback-ului de la evaluatori, voi:
-
-1. **Dacă se solicită îmbunătățiri model:**
-   - [ex: Experimente adiționale cu arhitecturi alternative]
-   - [ex: Colectare date suplimentare pentru clase problematice]
-   - **Actualizare:** `models/`, `results/`, README Etapa 5 și 6
-
-2. **Dacă se solicită îmbunătățiri date/preprocesare:**
-   - [ex: Rebalansare clase, augmentări suplimentare]
-   - **Actualizare:** `data/`, `src/preprocessing/`, README Etapa 3
-
-3. **Dacă se solicită îmbunătățiri arhitectură/State Machine:**
-   - [ex: Modificare fluxuri, adăugare stări]
-   - **Actualizare:** `docs/state_machine.*`, `src/app/`, README Etapa 4
-
-4. **Dacă se solicită îmbunătățiri documentație:**
-   - [ex: Detaliere secțiuni specifice]
-   - [ex: Adăugare diagrame explicative]
-   - **Actualizare:** README-urile etapelor vizate
-
-5. **Dacă se solicită îmbunătățiri cod:**
-   - [ex: Refactorizare module conform feedback]
-   - [ex: Adăugare teste unitare]
-   - **Actualizare:** `src/`, `requirements.txt`
-
-**Timeline:** Implementare corecții până la data examen
-**Commit final:** `"Versiune finală examen - toate corecțiile implementate"`
-**Tag final:** `git tag -a v1.0-final-exam -m "Versiune finală pentru examen"`
-```
+1. **Complexitatea nu înseamnă Performanță:** Arhitectura `Pyramid Deep` (mai complexă) a avut acuratețe mai mare, dar am ales `Baseline ReLU` pentru simplitate și viteză, diferența de precizie fiind neglijabilă.
+2. **Impactul setului de date:** Calitatea și echilibrarea datelor au fost decisive.
+3. **Importanța Analizei Erorilor:** Doar uitându-ne la exemplele greșite (JSON) am realizat că modelul nu înțelegea fizica coborârii pantelor, ceea ce a dus la implementarea fix-ului logic.
+4. **Iterația este cheia:** Proiectul a evoluat de la 17% acuratețe la 98% prin ajustări succesive ale datelor și parametrilor.
+5. **Testarea end-to-end:** A dus la descoperirea a multor probleme ascunse ale rețelei neuronale și ale logicii ui-ului (acțiunile pe baza predicției) care nu erau evidente doar din metricile de antrenare.
 ---
-
 ## Structura Repository-ului la Finalul Etapei 6
 
 **Structură COMPLETĂ și FINALĂ:**
@@ -466,8 +301,8 @@ proiect-rn-[prenume-nume]/
 │   ├── data_acquisition/                   # Din Etapa 4
 │   ├── preprocessing/                      # Din Etapa 3
 │   ├── neural_network/
-│   │   ├── model.py                        # Din Etapa 4
-│   │   ├── train.py                        # Din Etapa 5
+│   │   ├── visualize.py                    # NOU - generare grafice si grid exemple
+│   │   ├── train_model.py                  # Din Etapa 5
 │   │   ├── evaluate.py                     # Din Etapa 5
 │   │   └── optimize.py                     # NOU - Script optimizare/tuning
 │   └── app/
@@ -491,174 +326,7 @@ proiect-rn-[prenume-nume]/
 ├── requirements.txt                        # Actualizat
 └── .gitignore
 ```
-
-**Diferențe față de Etapa 5:**
-- Adăugat `etapa6_optimizare_concluzii.md` (acest fișier)
-- Adăugat `docs/confusion_matrix_optimized.png` - OBLIGATORIU
-- Adăugat `docs/results/` cu vizualizări finale
-- Adăugat `docs/optimization/` cu grafice comparative
-- Adăugat `docs/screenshots/inference_optimized.png` - OBLIGATORIU
-- Adăugat `models/optimized_model.h5` - OBLIGATORIU   
-- Adăugat `results/optimization_experiments.csv` - OBLIGATORIU #
-- Adăugat `results/final_metrics.json` - metrici finale  #
-- Adăugat `src/neural_network/optimize.py` - script optimizare
-- Actualizat `src/app/main.py` să încarce model OPTIMIZAT   #
-- (Opțional) `docs/state_machine_v2.png` dacă s-au făcut modificări  #
-
 ---
-
-## Instrucțiuni de Rulare (Etapa 6)
-
-### 1. Rulare experimente de optimizare
-
-```bash
-# Opțiunea A - Manual (minimum 4 experimente)
-python src/neural_network/train.py --lr 0.001 --batch 32 --epochs 100 --name exp1
-python src/neural_network/train.py --lr 0.0001 --batch 32 --epochs 100 --name exp2
-python src/neural_network/train.py --lr 0.001 --batch 64 --epochs 100 --name exp3
-python src/neural_network/train.py --lr 0.001 --batch 32 --dropout 0.5 --epochs 100 --name exp4
-```
-
-### 2. Evaluare și comparare
-
-```bash
-python src/neural_network/evaluate.py --model models/optimized_model.h5 --detailed
-
-# Output așteptat:
-# Test Accuracy: 0.8123
-# Test F1-score (macro): 0.7734
-# ✓ Confusion matrix saved to docs/confusion_matrix_optimized.png
-# ✓ Metrics saved to results/final_metrics.json
-# ✓ Top 5 errors analysis saved to results/error_analysis.json
-```
-
-### 3. Actualizare UI cu model optimizat
-
-```bash
-# Verificare că UI încarcă modelul corect
-streamlit run src/app/main.py
-
-# În consolă trebuie să vedeți:
-# Loading model: models/optimized_model.h5
-# Model loaded successfully. Accuracy on validation: 0.8123
-```
-
-### 4. Generare vizualizări finale
-
-```bash
-python src/neural_network/visualize.py --all
-
-# Generează:
-# - docs/results/metrics_evolution.png
-# - docs/results/learning_curves_final.png
-# - docs/optimization/accuracy_comparison.png
-# - docs/optimization/f1_comparison.png
-```
-
----
-
-## Checklist Final – Bifați Totul Înainte de Predare
-
-### Prerequisite Etapa 5 (verificare)
-- [x] Model antrenat există în `models/trained_model.h5`
-- [x] Metrici baseline raportate (Accuracy ≥65%, F1 ≥0.60)
-- [x] UI funcțional cu model antrenat
-- [ ] State Machine implementat
-
-### Optimizare și Experimentare
-- [x] Minimum 4 experimente documentate în tabel
-- [ ] Justificare alegere configurație finală
-- [ ] Model optimizat salvat în `models/optimized_model.h5`
-- [x] Metrici finale: **Accuracy ≥70%**, **F1 ≥0.65**
-- [x] `results/optimization_experiments.csv` cu toate experimentele
-- [x] `results/final_metrics.json` cu metrici model optimizat
-
-### Analiză Performanță
-- [x] Confusion matrix generată în `docs/confusion_matrix_optimized.png`
-- [ ] Analiză interpretare confusion matrix completată în README
-- [ ] Minimum 5 exemple greșite analizate detaliat
-- [ ] Implicații industriale documentate (cost FN vs FP)
-
-### Actualizare Aplicație Software
-- [ ] Tabel modificări aplicație completat
-- [x] UI încarcă modelul OPTIMIZAT (nu cel din Etapa 5)
-- [x] Screenshot `docs/screenshots/inference_optimized.png`
-- [x] Pipeline end-to-end re-testat și funcțional
-- [ ] (Dacă aplicabil) State Machine actualizat și documentat
-
-### Concluzii
-- [ ] Secțiune evaluare performanță finală completată
-- [ ] Limitări identificate și documentate
-- [ ] Lecții învățate (minimum 5)
-- [ ] Plan post-feedback scris
-
-### Verificări Tehnice
-- [x] `requirements.txt` actualizat
-- [x] Toate path-urile RELATIVE
-- [ ] Cod nou comentat (minimum 15%)
-- [ ] `git log` arată commit-uri incrementale
-- [ ] Verificare anti-plagiat respectată
-
-### Verificare Actualizare Etape Anterioare (ITERATIVITATE)
-- [ ] README Etapa 3 actualizat (dacă s-au modificat date/preprocesare)
-- [ ] README Etapa 4 actualizat (dacă s-a modificat arhitectura/State Machine)
-- [ ] README Etapa 5 actualizat (dacă s-au modificat parametri antrenare)
-- [ ] `docs/state_machine.*` actualizat pentru a reflecta versiunea finală
-- [ ] Toate fișierele de configurare sincronizate cu modelul optimizat
-
-### Pre-Predare
-- [ ] `etapa6_optimizare_concluzii.md` completat cu TOATE secțiunile
-- [ ] Structură repository conformă modelului de mai sus
-- [ ] Commit: `"Etapa 6 completă – Accuracy=X.XX, F1=X.XX (optimizat)"`
-- [ ] Tag: `git tag -a v0.6-optimized-final -m "Etapa 6 - Model optimizat + Concluzii"`
-- [ ] Push: `git push origin main --tags`
-- [ ] Repository accesibil (public sau privat cu acces profesori)
-
----
-
-## Livrabile Obligatorii
-
-Asigurați-vă că următoarele fișiere există și sunt completate:
-
-1. **`etapa6_optimizare_concluzii.md`** (acest fișier) cu:
-   - Tabel experimente optimizare (minimum 4)
-   - Tabel modificări aplicație software
-   - Analiză confusion matrix
-   - Analiză 5 exemple greșite
-   - Concluzii și lecții învățate
-
-2. **`models/optimized_model.h5`** (sau `.pt`, `.lvmodel`) - model optimizat funcțional
-
-3. **`results/optimization_experiments.csv`** - toate experimentele
-```
-
-4. **`results/final_metrics.json`** - metrici finale:
-
-Exemplu:
-```json
-{
-  "model": "optimized_model.h5",
-  "test_accuracy": 0.8123,
-  "test_f1_macro": 0.7734,
-  "test_precision_macro": 0.7891,
-  "test_recall_macro": 0.7612,
-  "false_negative_rate": 0.05,
-  "false_positive_rate": 0.12,
-  "inference_latency_ms": 35,
-  "improvement_vs_baseline": {
-    "accuracy": "+9.2%",
-    "f1_score": "+9.3%",
-    "latency": "-27%"
-  }
-}
-```
-
-5. **`docs/confusion_matrix_optimized.png`** - confusion matrix model final
-
-6. **`docs/screenshots/inference_optimized.png`** - demonstrație UI cu model optimizat
-
----
-
 ## Predare și Contact
 
 **Predarea se face prin:**
