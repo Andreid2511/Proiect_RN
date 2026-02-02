@@ -22,23 +22,24 @@ Scopul central nu este doar confortul, ci **reducerea consumului de combustibil*
 ---
 
 ## ⚙️ Arhitectura Sistemului
+`
+Sistemul este modularizat în 3 componente interconectate:
 
-Sistemul este modularizat în 3 componente interconectate, simulate într-un mediu virtual Python:
+1.  **Modulul de Achiziție Date & Simulare Fizică (`src/data_acquisition`):**
+    * Simulează fizica unui vehicul clasa C.
+    * Generează date sintetice complexe (Pante, Frânări, Accelerații).
+    * [Detalii complete aici](./src/data_acquisition/README.md)
 
-1.  **Modulul de Achiziție Date & Simulare Fizică:**
-    * Simulează fizica unui vehicul clasa C (ex: Vehicul clasa compacta).
-    * Generează date sintetice complexe (Pante sinusoidale, Frânări bruște, Accelerații variabile).
-    * Include zgomot realist al senzorilor pentru robustete.
-
-2.  **Modulul de Inteligență Artificială (Neural Network):**
+2.  **Modulul de Inteligență Artificială (`src/neural_network`):**
     * **Tehnologie:** TensorFlow / Keras.
     * **Arhitectură:** Rețea Deep Feed-Forward (DNN) cu 3 straturi ascunse.
-    * **Performanță:** Acuratețe >96% în clasificarea stilurilor (Eco / Normal / Sport).
+    * **Performanță:** Acuratețe >98% în clasificarea stilurilor.
+    * [Detalii complete aici](./src/neural_network/README.md)
 
-3.  **Interfața Grafică (Virtual Cockpit):**
-    * Dashboard digital în timp real (optimizat pentru latență minimă).
-    * Afișează telemetria (Viteză, RPM, Pantă) și decizia AI-ului.
-    * Execută schimbarea treptelor pe baza logicii hibride (AI + Fizică).
+3.  **Interfața Grafică - Virtual Cockpit (`src/app`):**
+    * Dashboard digital în timp real.
+    * Afișează telemetria și decizia AI-ului.
+    * [Detalii complete aici](./src/app/README.md)
 
 ---
 
@@ -48,9 +49,10 @@ Proiectul a fost dezvoltat incremental, fiecare etapă fiind documentată separa
 
 | Etapa | Descriere | Documentație |
 | :--- | :--- | :--- |
-| **Etapa 3** | Analiza datelor, generarea fizică și preprocesarea. | [Vezi README Etapa 3](./etapa3_analiza_date.md) |
-| **Etapa 4** | Definirea arhitecturii software și a Diagramelor de Stare. | [Vezi README Etapa 4](./etapa4_arhitectura_sia.md) |
-| **Etapa 5** | Antrenarea modelului Keras, optimizare și validare finală. | [Vezi README Etapa 5](./etapa5_antrenare_model.md) |
+| **Etapa 3** | Analiza datelor, generarea fizică și preprocesarea. | [Vezi README Etapa 3](./docs/etapa3_analiza_date.md) |
+| **Etapa 4** | Definirea arhitecturii software și a Diagramelor de Stare. | [Vezi README Etapa 4](./docs/etapa4_arhitectura_sia.md) |
+| **Etapa 5** | Antrenarea modelului Keras, optimizare și validare finală. | [Vezi README Etapa 5](./docs/etapa5_antrenare_model.md) |
+| **Etapa 6** | Analiza performanței, optimizare finală și concluzii. | [Vezi README Etapa 6](./docs/etapa6_optimizare_concluzii.md) |
 
 ---
 
@@ -58,30 +60,13 @@ Proiectul a fost dezvoltat incremental, fiecare etapă fiind documentată separa
 
 ### 1. Cerințe de sistem
 * Python 3.8+
-* Librării: `tensorflow`, `pandas`, `numpy`, `scikit-learn`, `tkinter`, `matplotlib`, `seaborn`,`joblib`.
+* Dependențe: Vezi `requirements.txt`
 
 ### 2. Instalare
 ```bash
+git clone https://github.com/Andreid2511/Proiect_RN.git
+cd Proiect_RN
+python -m venv venv
+source venv/bin/activate 
 pip install -r requirements.txt
 ```
-
-### 3. Rulare Aplicație (Demo)
-* Pentru a vedea bordul digital și a testa AI-ul în timp real:
-```bash
-python src/app/app_gui.py
-```
-
-### 4. Generare date si Re-antrenare Model
-* Dacă doriți să regenerați datele și să antrenați un model nou:
-```bash
-# 1. Generare date noi
-python src/data_acquisition/generate_data.py
-
-# 2. Antrenare rețea neuronală
-python src/neural_network/train_model.py
-```
-
-## 📊 Rezultate Cheie
-    * Acuratețe Detecție: 97% pe setul de testare.
-    * Timp de Răspuns: Sub 10ms (Inferență CPU optimizată).
-    * Impact: Eliminarea schimbărilor inutile de viteze în regim "Stop & Go", reducând uzura și consumul.

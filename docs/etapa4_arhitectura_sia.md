@@ -4,7 +4,7 @@
 **Instituție:** POLITEHNICA București – FIIR  
 **Student:** Boata Andrei-Darius  
 **Link Repository GitHub:** https://github.com/Andreid2511/Proiect_RN.git  
-**Data:** 15.01.2025
+**Data:** 12.12.2025
 
 ---
 

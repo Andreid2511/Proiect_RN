@@ -285,8 +285,6 @@ class DashboardApp:
             elif (self.rpm < downshift_rpm or (kickdown_enabled and self.rpm < 3500)) and self.gear > 1:
                 self.gear -= 1
                 self.shift_timer = 6 
-                if kickdown_enabled:
-                    self.justification_text = "KICKDOWN ACTIVE"
             if self.speed < 2: self.gear = 1   
     
     def update_physics(self):
