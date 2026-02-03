@@ -55,7 +55,7 @@ def simulate_behavior(num_samples, style):
             if is_climbing_hard:
                 base_th = random.uniform(60, 90)
             else:
-                base_th = random.uniform(10, 40) # Putin mai permisiv
+                base_th = random.uniform(10, 40) # Panta usoara => pedala mica
             
             if speed < current_speed_limit:
                 if random.random() < 0.02: target_throttle = base_th # Reactie mai lenta
@@ -156,7 +156,7 @@ def simulate_behavior(num_samples, style):
 current_dir = os.path.dirname(os.path.abspath(__file__))
 data_dir = os.path.abspath(os.path.join(current_dir, "../../data"))
 
-print("Generez date V9.0 (30 FPS Raw Data)...")
+print("Generez date (30 FPS Raw Data)...")
 os.makedirs(os.path.join(data_dir, "train"), exist_ok=True)
 os.makedirs(os.path.join(data_dir, "validation"), exist_ok=True)
 os.makedirs(os.path.join(data_dir, "test"), exist_ok=True)
@@ -164,7 +164,7 @@ os.makedirs(os.path.join(data_dir, "test"), exist_ok=True)
 cols_simple = ['rpm', 'speed', 'acceleration', 'throttle', 'brake', 'tilt', 'gear', 'style_label']
 
 all_data = []
-# Generam mai multe sample-uri pentru ca pasul de timp e mai mic (0.033 vs 0.1)
+# Generam mai multe sample-uri pentru ca pasul de timp este mic (0.033)
 all_data.extend(simulate_behavior(60000, 0)) 
 all_data.extend(simulate_behavior(60000, 1)) 
 all_data.extend(simulate_behavior(60000, 2)) 

@@ -40,7 +40,7 @@ Utilizarea asistenților de inteligență artificială (ChatGPT, Claude, Grok, G
 | 1 | Modelul RN a fost antrenat **de la zero** (weights inițializate random, **NU** model pre-antrenat descărcat) | [x] DA |
 | 2 | Minimum **40% din date sunt contribuție originală** (generate/achiziționate/etichetate de mine) | [x] DA |
 | 3 | Codul este propriu sau sursele externe sunt **citate explicit** în Bibliografie | [x] DA |
-| 4 | Arhitectura, codul și interpretarea rezultatelor reprezintă **muncă proprie** (AI folosit doar ca tool, nu ca sursă integrală de cod/dataset) | [x] DA |
+| 4 | Arhitectura, codul și interpretarea rezultatelor reprezintă și **muncă proprie** (AI folosit pentru cod initial, dar inteles) | [x] DA |
 | 5 | Pot explica și justifica **fiecare decizie importantă** cu argumente proprii | [x] DA |
 
 **Semnătură student (prin completare):** Declar pe propria răspundere că informațiile de mai sus sunt corecte.
@@ -290,9 +290,9 @@ Rezultatele indică o robustețe de 98%, ceea ce este excelent pentru un sistem 
 ## 8. Structura Repository-ului Final
 
 ```
-proiect-rn-[nume-prenume]/
+proiect-rn-[Boata-Andrei-Darius]/
 │
-├── README.md                               # ← ACEST FIȘIER (Overview Final Proiect - Pe moodle la Evaluare Finala RN > Upload Livrabil 1 - Proiect RN (Aplicatie Sofware) - trebuie incarcat cu numele: NUME_Prenume_Grupa_README_Proiect_RN.md)
+├── README.md                               # ← ACEST FIȘIER (Overview Final Proiect - Pe moodle la Evaluare Finala RN > Upload Livrabil 1 - Proiect RN (Aplicatie Sofware) - trebuie incarcat cu numele: BOATA_Andrei-Darius_633AB_README_Proiect_RN.md)
 │
 ├── docs/
 │   ├── etapa3_analiza_date.md              # Documentație Etapa 3
@@ -323,9 +323,6 @@ proiect-rn-[nume-prenume]/
 │
 ├── data/
 │   ├── README.md                           # Descriere detaliată dataset
-│   ├── raw/                                # Date brute originale
-│   ├── processed/                          # Date curățate și transformate
-│   ├── generated/                          # Date originale (contribuția ≥40%)
 │   ├── train/                              # Set antrenare (70%)
 │   ├── validation/                         # Set validare (15%)
 │   └── test/                               # Set testare (15%)
@@ -333,8 +330,7 @@ proiect-rn-[nume-prenume]/
 ├── src/
 │   ├── data_acquisition/                   # MODUL 1: Generare/Achiziție date
 │   │   ├── README.md                       # Documentație modul
-│   │   ├── generate.py                     # Script generare date originale
-│   │   └── [alte scripturi achiziție]
+│   │   └── generate_data.py                     # Script generare date originale
 │   │
 │   ├── preprocessing/                      # Preprocesare date (Etapa 3+)
 │   │   ├── data_cleaner.py                 # Curățare date
@@ -344,8 +340,7 @@ proiect-rn-[nume-prenume]/
 │   │
 │   ├── neural_network/                     # MODUL 2: Model RN
 │   │   ├── README.md                       # Documentație arhitectură RN
-│   │   ├── model.py                        # Definire arhitectură (Etapa 4)
-│   │   ├── train.py                        # Script antrenare (Etapa 5)
+│   │   ├── train_model.py                  # Definire arhitectură (Etapa 4)
 │   │   ├── evaluate.py                     # Script evaluare metrici (Etapa 5)
 │   │   ├── optimize.py                     # Script experimente optimizare (Etapa 6)
 │   │   └── visualize.py                    # Generare grafice și vizualizări
